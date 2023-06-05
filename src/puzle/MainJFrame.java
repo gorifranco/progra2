@@ -2,10 +2,7 @@ package puzle;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
-import javax.swing.text.Document;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
@@ -14,16 +11,17 @@ import java.io.IOException;
 public class MainJFrame extends JFrame {
 
     private MainJFrame ventana;
-    private JButton novaPartidaIcona, classificacioIcona, historialIcona, canviarDirectoriIcona, sortirIcona;
+    private JButton novaPartidaIcona, classificacioIcona, historialIcona, canviarDirectoriIcona, sortirIcona,
+    sortirBoto, historialBoto, classificacioBoto, novaPartidaButton, botoContinuar;
+    private JMenuItem novaPartidaBotoMenu, classificacioBotoMenu, historialBotoMenu, canviarDirectoriBotoMenu, sortirBotoMenu;
     private JTextArea areaVisualitzacioResultats;
-    private JPanel panellTop, panellStandby;
+    private JPanel panellTop, panellStandby, panellBotons;
     private JToolBar iconesMenu;
     private ObjetoGrafico objeto;
-    private Container panelContenidos;
-    private AreaVisualizacion visualizador;
+    private Container panellContinguts;
+    private AreaVisualitzacio panellVisualitzacio;
     private boolean visualizacionSolida = false;
-    private Color colorFondo = Color.BLACK;
-    private JRadioButton pintadoBoton, trazadoBoton;
+    private JLabel imatgeUIB;
     private boolean creacionObjeto = false;
     private final Font FONT1 = new Font("arial", Font.BOLD, 14);
     private final Font FONT2 = new Font("arial", Font.BOLD, 18);
@@ -47,8 +45,8 @@ public class MainJFrame extends JFrame {
         setTitle("PUZLE");
         setDefaultCloseOperation(MainJFrame.EXIT_ON_CLOSE);
         setSize(1150, 800);
-        panelContenidos = getContentPane();
-        panelContenidos.setLayout(new BorderLayout());
+        panellContinguts = getContentPane();
+        panellContinguts.setLayout(new BorderLayout());
         creacionContenedoresYComponentes();
         setVisible(true);
     }
@@ -57,181 +55,59 @@ public class MainJFrame extends JFrame {
         ////////////////////////////////////////////////////////////////////////
         //                                                                    //
         //                  CONTENEDOR JPanel visualizador                    //
-        ////////////////////////////////////////////////////////////////////////       
-        //DECLARACIÓN CONTENEDOR JPanel AreaVisualizacion visualizador
-        visualizador = new AreaVisualizacion();
-        //INTRODUCCIÓN CONTENEDOR JPanel visualizador EN EL PANEL DE CONTENIDOS
-        //DEL JFrame
-        panelContenidos.add(visualizador, BorderLayout.CENTER);
+        ////////////////////////////////////////////////////////////////////////
+
+        panellVisualitzacio = new AreaVisualitzacio();
+        panellContinguts.add(panellVisualitzacio, BorderLayout.CENTER);
 
 
         ////////////////////////////////////////////////////////////////////////
         //                                                                    //
-        //           CONTENEDOR JPanel panelCreacion y COMPONENTES            //
+        //           CONTENEDOR JPanel panellBotons y COMPONENTES            //
         ////////////////////////////////////////////////////////////////////////        
-        //DECLARACIÓN CONTENEDOR JPanel panelCreacion 
-        JPanel panelCreacion = new JPanel();
-        //ASIGNACIÓN AL CONTENEDOR panelCreacion DEL ADMINISTRADOR DE LAYOUT 
-        //GridLayout CON UNA ESTRUCTURA DE 8 FILAS Y 1 COLUMNA
-        panelCreacion.setLayout(new GridLayout(4, 1));
 
-        ////////COMPONENTE JButton novaPartidaButton
-        JButton novaPartidaButton = new JButton("NOVA PARTIDA");
+        panellBotons = new JPanel();
+        panellBotons.setLayout(new GridLayout(4, 1));
+
+        novaPartidaButton = new JButton("NOVA PARTIDA");
         novaPartidaButton.setFont(FONT1);
         novaPartidaButton.setForeground(Color.WHITE);
         novaPartidaButton.setBackground(Color.BLACK);
         novaPartidaButton.addMouseListener(new mouseListenerCustom());
-        panelCreacion.add(novaPartidaButton);
+        panellBotons.add(novaPartidaButton);
 
-        ////////COMPONENTE JButton historialGeneralButton
-        JButton historialGeneralButton = new JButton("HISTORIAL GENERAL");
-        historialGeneralButton.setFont(FONT1);
-        historialGeneralButton.setForeground(Color.WHITE);
-        historialGeneralButton.setBackground(Color.BLACK);
-        historialGeneralButton.addMouseListener(new mouseListenerCustom());
-        panelCreacion.add(historialGeneralButton);
+        classificacioBoto = new JButton("CLASSIFICACIÓ GENERAL");
+        classificacioBoto.setFont(FONT1);
+        classificacioBoto.setForeground(Color.WHITE);
+        classificacioBoto.setBackground(Color.BLACK);
+        classificacioBoto.addMouseListener(new mouseListenerCustom());
+        panellBotons.add(classificacioBoto);
 
-        ////////COMPONENTE JButton historialSelectiuButton
-        JButton historialSelectiuButton = new JButton("HISTORIAL SELECTIU");
-        historialSelectiuButton.setFont(FONT1);
-        historialSelectiuButton.setForeground(Color.WHITE);
-        historialSelectiuButton.setBackground(Color.BLACK);
-        historialSelectiuButton.addMouseListener(new mouseListenerCustom());
-        panelCreacion.add(historialSelectiuButton);
+        historialBoto = new JButton("HISTORIAL");
+        historialBoto.setFont(FONT1);
+        historialBoto.setForeground(Color.WHITE);
+        historialBoto.setBackground(Color.BLACK);
+        historialBoto.addMouseListener(new mouseListenerCustom());
+        panellBotons.add(historialBoto);
 
         ////////COMPONENTE JButton sortirButton
-        JButton sortirButton = new JButton("SORTIR");
-        sortirButton.setFont(FONT1);
-        sortirButton.setForeground(Color.WHITE);
-        sortirButton.setBackground(Color.BLACK);
-        sortirButton.addMouseListener(new mouseListenerCustom());
-        panelCreacion.add(sortirButton);
-
-
-        ////////////////////////////////////////////////////////////////////////
-        //                                                                    //
-        //           CONTENEDOR JPanel panelContexto y COMPONENTES            //
-        ////////////////////////////////////////////////////////////////////////               
-        //DECLARACIÓN CONTENEDOR JPanel panelContexto 
-        JPanel panelContexto = new JPanel();
-        //ASIGNACIÓN AL CONTENEDOR panelCreacion DEL ADMINISTRADOR DE LAYOUT 
-        //GridLayout CON UNA ESTRUCTURA DE 8 FILAS Y 1 COLUMNA
-        panelContexto.setLayout(new GridLayout(4, 1));
-
-
-        ////////////////////////////////////////////////////////////////////////
-        ////////////////   CONTENEDOR JPanel contenedorStroke   ////////////////
-        //DECLARACIÓN CONTENEDOR JPanel contenedorStroke
-        JPanel contenedorStroke = new JPanel();
-        //ASIGNACIÓN AL contenedorSTroke DEL ADMINISTRADOR DE LAYOUT BorderLayout
-        contenedorStroke.setLayout(new BorderLayout());
-
-        ////////COMPONENTE JButton strokeBoton
-        JButton strokeBoton = new JButton("STROKE");
-        //asignación tipografia a la componente JButton strokeBoton
-        strokeBoton.setFont(new Font("arial", Font.BOLD, 13));
-        //asignación color de abrirBoton componente JButton strokeBoton
-        strokeBoton.setForeground(Color.WHITE);
-        //asignación color de fondo componente JButton strokeBoton
-        strokeBoton.setBackground(Color.BLACK);
-        //manipulador de evento asociado a la componente 
-        //JButton strokeBoton
-        strokeBoton.addMouseListener(new mouseListenerCustom());
-        //introducción de la componente JButton strokeBoton en el contenedor
-        //JPanel contenedorStroke
-        contenedorStroke.add(strokeBoton, BorderLayout.NORTH);
-
-        ////////////////////////////////////////////////////////////////////////
-        ////////////////   CONTENEDOR JPanel contenedorPaint    ////////////////
-        //DECLARACIÓN contenedor JPanel contenedoPaint
-        JPanel contenedorPaint = new JPanel();
-        //ASIGNACIÓN AL contenedorPaint DEL ADMINISTRADOR DE LAYOUT BorderLayout
-        contenedorPaint.setLayout(new BorderLayout());
-
-        ////////COMPONENTE JButton paintBoton
-        JButton paintBoton = new JButton("PAINT");
-        //asignación tipografia a la componente JButton paintBoton
-        paintBoton.setFont(new Font("arial", Font.BOLD, 13));
-        //asignación color de abrirBoton componente JButton paintBoton
-        paintBoton.setForeground(Color.WHITE);
-        //asignación color de fondo componente JButton paintBoton
-        paintBoton.setBackground(Color.BLACK);
-        //manipulador de evento asociado a la componente
-        //JButton paintBoton
-        paintBoton.addMouseListener(new mouseListenerCustom());
-        //inclusión de la componente JButton paintBoton en el contenedor JPanel
-        //contenedorPaint
-        contenedorPaint.add(paintBoton, BorderLayout.NORTH);
-
-        ////////////////////////////////////////////////////////////////////////
-        ////////////////   CONTENEDOR JPanel contenedorTrazado  ////////////////
-        //declaración contenedor JPanel contenedorTrazado
-        JPanel contenedorTrazado = new JPanel();
-        //ASIGNACIÓN AL contenedorTrazado DEL ADMINISTRADOR DE LAYOUT BorderLayout
-        contenedorTrazado.setLayout(new BorderLayout());
-
-        ////////COMPONENTE JButton colorTrazadoBoton
-        JButton colorTrazadoBoton = new JButton("COLOR TRAZADO");
-        //asignación tipografia a la componente JButton colorTrazadoBoton
-        colorTrazadoBoton.setFont(new Font("arial", Font.BOLD, 13));
-        //asignación color de abrirBoton componente JButton colorTrazadoBoton
-        colorTrazadoBoton.setForeground(Color.WHITE);
-        //asignación color de fondo componente JButton colorTrazadoBoton
-        colorTrazadoBoton.setBackground(Color.BLACK);
-        //manipulador de evento asociado a la componente
-        //JButton colorTrazadoBoton
-        colorTrazadoBoton.addMouseListener(new mouseListenerCustom());
-        //inclusión de la componente JButton colorTrazadoBoton en el contenedor JPanel
-        //contenedorTrazado
-        contenedorTrazado.add(colorTrazadoBoton, BorderLayout.NORTH);
-
-
-        //INTRODUCCIÓN EN EL CONTENEDOR JPanel panelContexto DEL CONTENEDOR
-        //JPanel contenedorTrazado
-        panelContexto.add(contenedorTrazado);
-
-
-        ////////COMPONENTE JButton colorFondoBoton
-        JButton colorFondoBoton = new JButton("COLOR FONDO");
-        //asignación tipografia a la componente JButton colorFondoBoton
-        colorFondoBoton.setFont(new Font("arial", Font.BOLD, 13));
-        //asignación color de abrirBoton componente JButton colorFondoBoton
-        colorFondoBoton.setForeground(Color.WHITE);
-        //asignación color de fondo componente JButton colorFondoBoton
-        colorFondoBoton.setBackground(Color.BLACK);
-        //manipulador de evento asociado a la componente
-        //JButton colorFondoBoton
-        colorFondoBoton.addMouseListener(new mouseListenerCustom());
-        //inclusión de la componente JButton colorFondoBoton en el contenedor JPanel
-        //panelColores
-        panelContexto.add(colorFondoBoton);
+        sortirBoto = new JButton("SORTIR");
+        sortirBoto.setFont(FONT1);
+        sortirBoto.setForeground(Color.WHITE);
+        sortirBoto.setBackground(Color.BLACK);
+        sortirBoto.addMouseListener(new mouseListenerCustom());
+        panellBotons.add(sortirBoto);
 
 
         ////////////////////////////////////////////////////////////////////////
         //                                                                    //
         //            CONTENEDOR JPanel panelVarios y COMPONENTES             //
         ////////////////////////////////////////////////////////////////////////
-        //DECLARACIÓN contenedor JPanel para colocar 5 componentes JButton y el
-        //contenedor JPanel panelVarios
-        JPanel panelVarios = new JPanel();
-        //asignación administrador GridLayout al contenedor JPanel panelVarios
-        panelVarios.setLayout(new GridLayout(1, 1));
-
-        ////////COMPONENTE JButton borrarBoton
-        JButton borrarBoton = new JButton("CONTINUAR");
-        //asignación tipografia a la componente JButton borrarBoton
-        borrarBoton.setFont(new Font("arial", Font.BOLD, 13));
-        //asignación color de abrirBoton componente JButton COLOR TRAZADO
-        borrarBoton.setForeground(Color.WHITE);
-        //asignación color de fondo componente JButton COLOR TRAZADO
-        borrarBoton.setBackground(Color.BLACK);
-        //manipulador de evento asociado a la componente
-        //JButton COLOR TRAZADO
-        borrarBoton.addMouseListener(new mouseListenerCustom());
-        //inclusión de la componente JButton fondo en el contenedor JPanel
-        //panelVarios
-        panelVarios.add(borrarBoton);
-
+        botoContinuar = new JButton("CONTINUAR");
+        botoContinuar.setFont(FONT1);
+        botoContinuar.setForeground(Color.WHITE);
+        botoContinuar.setBackground(Color.BLACK);
+        botoContinuar.addMouseListener(new mouseListenerCustom());
 
         ////////////////////////////////////////////////////////////////////////
         //                                                                    //
@@ -245,40 +121,40 @@ public class MainJFrame extends JFrame {
         generalMenu.setBackground(Color.black);
         generalMenu.setForeground(Color.WHITE);
 
-        JMenuItem novaPartidaBoto = new JMenuItem("PARTIDA NOVA");
-        JMenuItem classificacioBoto = new JMenuItem("CLASSIFICACIÓ GENERAL");
-        JMenuItem historialBoto = new JMenuItem("HISTORIAL");
-        JMenuItem canviarDirectoriBoto = new JMenuItem("CANVIAR DIRECTORI D'IMATGES");
-        JMenuItem sortirBoto = new JMenuItem("SORTIR");
+        novaPartidaBotoMenu = new JMenuItem("PARTIDA NOVA");
+        classificacioBotoMenu = new JMenuItem("CLASSIFICACIÓ GENERAL");
+        historialBotoMenu = new JMenuItem("HISTORIAL");
+        canviarDirectoriBotoMenu = new JMenuItem("CANVIAR DIRECTORI D'IMATGES");
+        sortirBotoMenu = new JMenuItem("SORTIR");
 
-        novaPartidaBoto.setBackground(Color.black);
-        novaPartidaBoto.setForeground(Color.WHITE);
-        novaPartidaBoto.setFont(FONT1);
-        classificacioBoto.setBackground(Color.black);
-        classificacioBoto.setForeground(Color.WHITE);
-        classificacioBoto.setFont(FONT1);
-        historialBoto.setBackground(Color.black);
-        historialBoto.setForeground(Color.WHITE);
-        historialBoto.setFont(FONT1);
-        canviarDirectoriBoto.setBackground(Color.black);
-        canviarDirectoriBoto.setForeground(Color.WHITE);
-        canviarDirectoriBoto.setFont(FONT1);
-        sortirBoto.setBackground(Color.black);
-        sortirBoto.setForeground(Color.WHITE);
-        sortirBoto.setFont(FONT1);
+        novaPartidaBotoMenu.setBackground(Color.black);
+        novaPartidaBotoMenu.setForeground(Color.WHITE);
+        novaPartidaBotoMenu.setFont(FONT1);
+        classificacioBotoMenu.setBackground(Color.black);
+        classificacioBotoMenu.setForeground(Color.WHITE);
+        classificacioBotoMenu.setFont(FONT1);
+        historialBotoMenu.setBackground(Color.black);
+        historialBotoMenu.setForeground(Color.WHITE);
+        historialBotoMenu.setFont(FONT1);
+        canviarDirectoriBotoMenu.setBackground(Color.black);
+        canviarDirectoriBotoMenu.setForeground(Color.WHITE);
+        canviarDirectoriBotoMenu.setFont(FONT1);
+        sortirBotoMenu.setBackground(Color.black);
+        sortirBotoMenu.setForeground(Color.WHITE);
+        sortirBotoMenu.setFont(FONT1);
 
-        novaPartidaBoto.addMouseListener(new mouseListenerCustom());
-        classificacioBoto.addMouseListener(new mouseListenerCustom());
-        sortirBoto.addMouseListener(new mouseListenerCustom());
-        historialBoto.addMouseListener(new mouseListenerCustom());
-        canviarDirectoriBoto.addMouseListener(new mouseListenerCustom());
-        sortirBoto.addMouseListener(new mouseListenerCustom());
+        novaPartidaBotoMenu.addMouseListener(new mouseListenerCustom());
+        classificacioBotoMenu.addMouseListener(new mouseListenerCustom());
+        sortirBotoMenu.addMouseListener(new mouseListenerCustom());
+        historialBotoMenu.addMouseListener(new mouseListenerCustom());
+        canviarDirectoriBotoMenu.addMouseListener(new mouseListenerCustom());
+        sortirBotoMenu.addMouseListener(new mouseListenerCustom());
 
-        generalMenu.add(novaPartidaBoto);
-        generalMenu.add(classificacioBoto);
-        generalMenu.add(historialBoto);
-        generalMenu.add(canviarDirectoriBoto);
-        generalMenu.add(sortirBoto);
+        generalMenu.add(novaPartidaBotoMenu);
+        generalMenu.add(classificacioBotoMenu);
+        generalMenu.add(historialBotoMenu);
+        generalMenu.add(canviarDirectoriBotoMenu);
+        generalMenu.add(sortirBotoMenu);
 
         barraMenu.add(generalMenu);
 
@@ -297,6 +173,8 @@ public class MainJFrame extends JFrame {
         historialIcona = new JButton();
         canviarDirectoriIcona = new JButton();
         sortirIcona = new JButton();
+
+        novaPartidaIcona.addMouseListener();
 
         try {
             classificacioIcona.setIcon(new ImageIcon(ImageIO.read(getClass().getResource("../icones/iconoHistorialSelectivo.jpg"))));
@@ -323,18 +201,17 @@ public class MainJFrame extends JFrame {
         //                                                                    //
         //                SEPARADORES JSplitPane DE LA INTERFACE              //
         ////////////////////////////////////////////////////////////////////////
+
         JSplitPane separadorNorte = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
         JSplitPane separadorSur = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
         JSplitPane separadorOeste = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 
-        separadorOeste.add(panelCreacion);
-        panelContenidos.add(separadorOeste, BorderLayout.WEST);
-
+        separadorOeste.add(panellBotons);
+        panellContinguts.add(separadorOeste, BorderLayout.WEST);
         separadorNorte.add(panellTop);
-        panelContenidos.add(separadorNorte, BorderLayout.NORTH);
-
-        separadorSur.setBottomComponent(panelVarios);
-        panelContenidos.add(separadorSur, BorderLayout.SOUTH);
+        panellContinguts.add(separadorNorte, BorderLayout.NORTH);
+        separadorSur.setBottomComponent(botoContinuar);
+        panellContinguts.add(separadorSur, BorderLayout.SOUTH);
     }
 
     ////////////////////////////////////////////////////////////////////////////
@@ -342,10 +219,8 @@ public class MainJFrame extends JFrame {
     //                        CLASE AreaVisualizacion                         //
     //                                                                        //
     //////////////////////////////////////////////////////////////////////////// 
-    public class AreaVisualizacion extends JPanel {
-        private JLabel imatgeUIB;
-
-        public AreaVisualizacion() {
+    public class AreaVisualitzacio extends JPanel {
+        public AreaVisualitzacio() {
             imatgeUIB = new JLabel();
             this.setBackground(Color.black);
             try {
@@ -354,10 +229,8 @@ public class MainJFrame extends JFrame {
                 System.out.println(e.getMessage());
             }
             add(imatgeUIB);
-            imatgeUIB.setVisible(false);
-            add(obtenirResultats());
-            this.setBackground(Color.WHITE);
-            areaVisualitzacioResultats.setVisible(true);
+            imatgeUIB.setVisible(true);
+
         }
     }
 
@@ -383,12 +256,23 @@ public class MainJFrame extends JFrame {
         return null;
     }
 
+
     private class mouseListenerCustom implements MouseListener {
 
         @Override
         public void mouseClicked(MouseEvent e) {
-
-
+if(e.getSource().equals(sortirIcona)) System.exit(0);
+if(e.getSource().equals(sortirBoto)) System.exit(0);
+if(e.getSource().equals(historialBoto) || e.getSource().equals(historialIcona)){
+    panellVisualitzacio.add(obtenirResultats());
+    panellVisualitzacio.setBackground(Color.WHITE);
+    imatgeUIB.setVisible(false);
+}
+if(e.getSource().equals(historialBotoMenu)){
+    panellVisualitzacio.add(obtenirResultats());
+    panellVisualitzacio.setBackground(Color.WHITE);
+    imatgeUIB.setVisible(false);
+}
         }
 
         @Override
