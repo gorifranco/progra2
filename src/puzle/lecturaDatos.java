@@ -8,7 +8,7 @@ TALLER 2 - PROGRAMACIÓN II - CURSO 2020-2021 - UIB
 autor: Juan Montes de Oca
  */
 
-package tallergrafico_2020_21;
+package puzle;
 
 import java.awt.Container;
 import java.awt.GridLayout;

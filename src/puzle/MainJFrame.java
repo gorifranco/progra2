@@ -1,4 +1,4 @@
-package tallergrafico_2020_21;
+package puzle;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.Ellipse2D;
@@ -9,23 +9,20 @@ import java.io.File;
 import java.io.IOException;
 import javax.imageio.ImageIO;
 import javax.swing.*;
-import javax.swing.JOptionPane;
 
-public class TALLER2_CON_BUFFER_IMAGEN_SIMPLIFICADO extends JFrame {
+public class MainJFrame extends JFrame {
 
-    enum tipoComponenteMotivo {STROKE,PAINT,TRAZADO}
-    private TALLER2_CON_BUFFER_IMAGEN_SIMPLIFICADO ventana;
+    private MainJFrame ventana;
+    private JButton novaPartidaIcona, classificacioIcona, historialIcona, canviarDirectoriIcona, sortirIcona;
+    private JToolBar iconesMenu;
     private ObjetoGrafico objeto;  
     private Container panelContenidos;
     private AreaVisualizacion visualizador;
-    private boolean visualizacionSolida=false;    
-    private BasicStroke atributoStroke=new BasicStroke(1.0f);
-    private Color colorTrazado=Color.BLUE;
+    private boolean visualizacionSolida=false;
     private Color colorFondo=Color.BLACK;
-    private Paint paintActual=Color.RED;
     private JRadioButton pintadoBoton,trazadoBoton;
     private boolean creacionObjeto=false;
-    private Font FONT1 = new Font("arial", Font.BOLD, 14);
+    private final Font FONT1 = new Font("arial", Font.BOLD, 14);
 
     
     //MÉTODO MAIN
@@ -36,19 +33,20 @@ public class TALLER2_CON_BUFFER_IMAGEN_SIMPLIFICADO extends JFrame {
         } catch (Exception error) {
             System.out.println("NO SE HA ESTABLECIDO LA APARIENCIA DESEADA: " + error);
         }       
-        new TALLER2_CON_BUFFER_IMAGEN_SIMPLIFICADO();        
+        new MainJFrame();
     }
     
     
 ////////CONSTRUCTOR
     
-    public TALLER2_CON_BUFFER_IMAGEN_SIMPLIFICADO() {
+    public MainJFrame() {
         setTitle("PUZLE");
-        setDefaultCloseOperation(TALLER2_CON_BUFFER_IMAGEN_SIMPLIFICADO.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(MainJFrame.EXIT_ON_CLOSE);
         setSize(1150,800);
         panelContenidos=getContentPane();
         panelContenidos.setLayout(new BorderLayout());
-        creacionContenedoresYComponentes();                  
+        creacionContenedoresYComponentes();
+        setVisible(true);
     }
 
     private void creacionContenedoresYComponentes() {
@@ -216,10 +214,10 @@ public class TALLER2_CON_BUFFER_IMAGEN_SIMPLIFICADO extends JFrame {
         //contenedor JPanel panelVarios
         JPanel panelVarios = new JPanel();
         //asignación administrador GridLayout al contenedor JPanel panelVarios
-        panelVarios.setLayout(new  GridLayout(1,3));
+        panelVarios.setLayout(new  GridLayout(1,1));
 
         ////////COMPONENTE JButton borrarBoton
-        JButton borrarBoton = new JButton("BORRAR");
+        JButton borrarBoton = new JButton("CONTINUAR");
         //asignación tipografia a la componente JButton borrarBoton
         borrarBoton.setFont(new Font("arial", Font.BOLD, 13));
         //asignación color de abrirBoton componente JButton COLOR TRAZADO
@@ -233,92 +231,41 @@ public class TALLER2_CON_BUFFER_IMAGEN_SIMPLIFICADO extends JFrame {
         //panelVarios
         panelVarios.add(borrarBoton);
 
-
-
-        ////////////////////////////////////////////////////////////////////////
-        //                                                                    //
-        //        CONTENEDOR JPanel panelVisualizacion y COMPONENTES          //
-        ////////////////////////////////////////////////////////////////////////  
-        ////////DECLARACIÓN CONTENEDOR JPanel panelVisualizacion
-        JPanel panelVisualizacion=new JPanel();
-        //asignación administrador de layout FlowLayout al panel panelVisualizacion
-        panelVisualizacion.setLayout(new GridLayout(2,1));
-        
-        /////////COMPONENTE JRadioButton pintadoBoton
-        pintadoBoton = new JRadioButton("PINTADO",false);
-        //asignación tipografia a la componente JRadioButton pintadoBoton
-        pintadoBoton.setFont(new Font("arial", Font.BOLD, 12));
-        //asignación color de abrirBoton componente JRadioButton pintadoBoton
-        pintadoBoton.setForeground(Color.WHITE);
-        //asignación color de fondo componente JRadioButton pintadoBoton
-        pintadoBoton.setBackground(Color.BLACK);
-        //asignación manipulador de eventos manipuladorEventosGeneral a la componente
-        //JRadioButton pintadoBoton
-        pintadoBoton.addActionListener(new manipuladorEventosCreacion());
-        //inclusión de la componente JRadioButton pintadoBoton en el contenedor JPanel
-        //panelVarios
-        panelVisualizacion.add(pintadoBoton);        
-        
-        ////////COMPONENTE JRadioButton trazadoBoton
-        trazadoBoton = new JRadioButton("TRAZADO",true);
-        //asignación tipografia a la componente JRadioButton trazadoBoton
-        trazadoBoton.setFont(new Font("arial", Font.BOLD, 12));
-        //asignación color de abrirBoton componente JRadioButton trazadoBoton
-        trazadoBoton.setForeground(Color.WHITE);
-        //asignación color de fondo componente JRadioButton trazadoBoton
-        trazadoBoton.setBackground(Color.BLACK);
-        //asignación manipulador de eventos manipuladorEventosGeneral a la componente
-        //JRadioButton trazadoBoton
-        trazadoBoton.addActionListener(new manipuladorEventosCreacion());
-        //inclusión de la componente JRadioButton trazadoBoton en el contenedor JPanel
-        //panelVarios
-        panelVisualizacion.add(trazadoBoton); 
-
-        ////////AGRUPACIÓN DE LOS BOTOTNES JRadioButton pintadoBoton y trazadoBoton en el
-        ////////grupo ButtonGroup grupoJRadioButton
-        ButtonGroup grupoJRadioButton= new ButtonGroup();
-        grupoJRadioButton.add(pintadoBoton);
-        grupoJRadioButton.add(trazadoBoton);
-
-        ////////INCLUSIÓN CONTENEDOR panelVisualizacion EN EL CONTENEDOR JPanel panelVarios
-        panelVarios.add(panelVisualizacion);
-
-        ////////COMPONENTE JButton guardarComoBoton
-        JButton salirBoton = new JButton("SALIR");
-        //asignación tipografia a la componente JButton salirBoton
-        salirBoton.setFont(new Font("arial", Font.BOLD, 13));
-        //asignación color de abrirBoton componente JButton salirBoton
-        salirBoton.setForeground(Color.WHITE);
-        //asignación color de fondo componente JButton salirBoton
-        salirBoton.setBackground(Color.BLACK);
-        //manipulador de evento asociado a la componente
-        //JButton salirBoton
-        salirBoton.addActionListener(new manipuladorEventosCreacion());
-        //inclusión de la componente JButton salirBoton en el contenedor JPanel
-        //panelVarios
-        panelVarios.add(salirBoton);
-
         
 
         ////////////////////////////////////////////////////////////////////////
         //                                                                    //
         //          COMPONENTE JMenuBar barraMenu y COMPONENTES            //
-        ////////////////////////////////////////////////////////////////////////  
-        ////////DECLARACIÓN COMPONENTE JMenuBar barraMenu
+        ////////////////////////////////////////////////////////////////////////
         JMenuBar barraMenu=new JMenuBar();
 
         JMenu generalMenu=new JMenu("MENU");
         barraMenu.setBackground(Color.BLACK);
         barraMenu.setForeground(Color.WHITE);
-
+        generalMenu.setBackground(Color.black);
         generalMenu.setForeground(Color.WHITE);
-
 
         JMenuItem novaPartidaBoto=new JMenuItem("PARTIDA NOVA");
         JMenuItem classificacioBoto=new JMenuItem("CLASSIFICACIÓ GENERAL");
         JMenuItem historialBoto = new JMenuItem("HISTORIAL");
         JMenuItem canviarDirectoriBoto = new JMenuItem("CANVIAR DIRECTORI D'IMATGES");
         JMenuItem sortirBoto=new JMenuItem("SORTIR");
+
+        novaPartidaBoto.setBackground(Color.black);
+        novaPartidaBoto.setForeground(Color.WHITE);
+        novaPartidaBoto.setFont(FONT1);
+        classificacioBoto.setBackground(Color.black);
+        classificacioBoto.setForeground(Color.WHITE);
+        classificacioBoto.setFont(FONT1);
+        historialBoto.setBackground(Color.black);
+        historialBoto.setForeground(Color.WHITE);
+        historialBoto.setFont(FONT1);
+        canviarDirectoriBoto.setBackground(Color.black);
+        canviarDirectoriBoto.setForeground(Color.WHITE);
+        canviarDirectoriBoto.setFont(FONT1);
+        sortirBoto.setBackground(Color.black);
+        sortirBoto.setForeground(Color.WHITE);
+        sortirBoto.setFont(FONT1);
 
         novaPartidaBoto.addMouseListener(new mouseListenerCustom());
         classificacioBoto.addMouseListener(new mouseListenerCustom());
@@ -327,16 +274,52 @@ public class TALLER2_CON_BUFFER_IMAGEN_SIMPLIFICADO extends JFrame {
         canviarDirectoriBoto.addMouseListener(new mouseListenerCustom());
         sortirBoto.addMouseListener(new mouseListenerCustom());
 
-
-
         generalMenu.add(novaPartidaBoto);
         generalMenu.add(classificacioBoto);
         generalMenu.add(historialBoto);
         generalMenu.add(canviarDirectoriBoto);
         generalMenu.add(sortirBoto);
-        
-        ////////INLCUSIÓN MENUS EN LA BARRA DE MENUS
+
         barraMenu.add(generalMenu);
+
+
+        ////////////////////////////////////////////////////////////////////////
+        //                                                                    //
+        //                            JToolBar                                //
+        ////////////////////////////////////////////////////////////////////////
+
+iconesMenu = new JToolBar();
+iconesMenu.setBackground(Color.green);
+iconesMenu.setFloatable(false);
+
+        novaPartidaIcona = new JButton();
+        classificacioIcona = new JButton();
+        historialIcona = new JButton();
+        canviarDirectoriIcona = new JButton();
+        sortirIcona = new JButton();
+
+        try {
+            classificacioIcona.setIcon(new ImageIcon(ImageIO.read(getClass().getResource("../icones/iconoHistorialSelectivo.jpg"))));
+            novaPartidaIcona.setIcon(new ImageIcon(ImageIO.read(getClass().getResource("../icones/iconoNuevaPartida.jpg"))));
+            historialIcona.setIcon(new ImageIcon(ImageIO.read(getClass().getResource("../icones/iconoHistorialGeneral.jpg"))));
+            canviarDirectoriIcona.setIcon(new ImageIcon(ImageIO.read(getClass().getResource("../icones/iconoCambiarDIrectorio.jpg"))));
+            sortirIcona.setIcon(new ImageIcon(ImageIO.read(getClass().getResource("../icones/iconoSalir.jpg"))));
+
+        }catch(IOException e){
+            System.out.println(e.getMessage());
+        }
+
+        iconesMenu.add(novaPartidaIcona);
+        iconesMenu.add(classificacioIcona);
+        iconesMenu.add(historialIcona);
+        iconesMenu.add(canviarDirectoriIcona);
+        iconesMenu.add(sortirIcona);
+
+JPanel panelTop = new JPanel(new GridLayout(2,1));
+panelTop.add(barraMenu);
+panelTop.add(iconesMenu);
+
+
         
 
         ////////////////////////////////////////////////////////////////////////
@@ -368,8 +351,9 @@ public class TALLER2_CON_BUFFER_IMAGEN_SIMPLIFICADO extends JFrame {
 
         
         //INCLUSIÓN DEL CONTENEDOR JPanel panelSuperior EN EL SEPARADOR separadorNorte 
-        separadorNorte.add(barraMenu);
-        
+        separadorNorte.add(panelTop);
+
+
         //INCLUSIÓN DEL SEPARADOR separadorNorte EN LA ZONA NORTH DEL PANEL DE 
         //CONTENIDOS DEL JFrame
         panelContenidos.add(separadorNorte, BorderLayout.NORTH); 
@@ -379,8 +363,8 @@ public class TALLER2_CON_BUFFER_IMAGEN_SIMPLIFICADO extends JFrame {
 
         //INCLUSIÓN DEL SEPARADOR separadorSur EN LA ZONA SOUTH DEL PANEL DE 
         //CONTENIDOS DEL JFrame     
-        panelContenidos.add(separadorSur, BorderLayout.SOUTH);  
-   
+        panelContenidos.add(separadorSur, BorderLayout.SOUTH);
+
         
         
         ////////////////////////////////////////////////////////////////////////
@@ -618,42 +602,6 @@ public class TALLER2_CON_BUFFER_IMAGEN_SIMPLIFICADO extends JFrame {
         return null;
     }
 
-    
-    //generación del nuevo stributo Stroke a aplicar a través de los datos introducidos por
-    //el usuario a demanda de la aplicación
-    private void definicionStroke() {
-        //DECLARACIONES PARÁMETROS ATRIBUTO STROKE CON VALORES INICIALES
-         int opcionStroke=0,opcionPatron=0;
-         float stroke=1;
-         float [] patronTrazado={15,8};
-         //declaración e inicialización de los literales de conceptos de valores de los diferentes parámetros
-         //del atributo Stroke
-         String [] opcionesStroke = {"ANCHO TRAZADO 1.0", "ANCHO TRAZADO 3.0", "ANCHO TRAZADO 5.0"};
-         String [] opcionesPatronTrazado= {"TRAZADO CONTINUO","TRAZADO DISCONTINUO"};
-         //SOLICITUD E INTRODUCCIÓN INTERACTIVA DE LOS DIFERENTES VALORES DE LOS PARÁMETROS
-         //DEL ATRIBUTO Stroke
-         try { 
-             opcionStroke = JOptionPane.showOptionDialog(null, "ELIJA EL ANCHO DEL TRAZADO","PULSAR BOTÓN",
-                                        JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, 
-                                        null, opcionesStroke, opcionesStroke[0]);    
-             switch (opcionStroke) {
-                 case 0:    stroke=1;break;
-                 case 1:    stroke=3;break;
-                 case 2:    stroke=5;break;                
-             }
-             opcionPatron = JOptionPane.showOptionDialog(null, "ELIJA EL PATRÓN DE TRAZADO","PULSAR BOTÓN",
-                                        JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, 
-                                        null, opcionesPatronTrazado, opcionesPatronTrazado[0]);            
-         }catch (Exception error) {}
-         //Si se han introducido patrones de trazado
-         if (opcionPatron>0) {
-             atributoStroke=new BasicStroke(stroke,BasicStroke.CAP_ROUND,BasicStroke.JOIN_ROUND,2.0f,patronTrazado,0.0f);
-         }
-         else {
-             atributoStroke=new BasicStroke(stroke,BasicStroke.CAP_ROUND,BasicStroke.JOIN_ROUND,2.0f);
-         }        
-    }
-
     private class mouseListenerCustom implements MouseListener{
 
         @Override
@@ -717,10 +665,6 @@ public class TALLER2_CON_BUFFER_IMAGEN_SIMPLIFICADO extends JFrame {
                                         break;
                 case "SALIR"           :System.exit(0);
                                         break;
-
-
-
-
             }
     }}
 }
