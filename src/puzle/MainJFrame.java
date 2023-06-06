@@ -7,24 +7,28 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Random;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.List;
 
 public class MainJFrame extends JFrame {
-
-    private MainJFrame ventana;
     private JButton novaPartidaIcona, classificacioIcona, historialIcona, canviarDirectoriIcona, sortirIcona,
-    sortirBoto, historialBoto, classificacioBoto, novaPartidaButton, botoContinuar;
+            sortirBoto, historialBoto, classificacioBoto, novaPartidaButton, botoContinuar;
     private JMenuItem novaPartidaBotoMenu, classificacioBotoMenu, historialBotoMenu, canviarDirectoriBotoMenu, sortirBotoMenu;
+    private JMenuBar barraMenu;
     private JTextArea areaVisualitzacioResultats;
     private JPanel panellTop, panellStandby, panellBotons;
+    private JSplitPane separadorNorte, separadorSur, separadorOeste;
     private JToolBar iconesMenu;
-    private ObjetoGrafico objeto;
     private Container panellContinguts;
     private AreaVisualitzacio panellVisualitzacio;
-    private boolean visualizacionSolida = false;
     private JLabel imatgeUIB;
-    private boolean creacionObjeto = false;
     private final Font FONT1 = new Font("arial", Font.BOLD, 14);
     private final Font FONT2 = new Font("arial", Font.BOLD, 18);
+    private File carpetaImatges;
 
 
     //MÉTODO MAIN
@@ -74,6 +78,7 @@ public class MainJFrame extends JFrame {
         novaPartidaButton.setForeground(Color.WHITE);
         novaPartidaButton.setBackground(Color.BLACK);
         novaPartidaButton.addMouseListener(new mouseListenerCustom());
+        novaPartidaButton.setUI(new ButtonUICustom());
         panellBotons.add(novaPartidaButton);
 
         classificacioBoto = new JButton("CLASSIFICACIÓ GENERAL");
@@ -81,6 +86,7 @@ public class MainJFrame extends JFrame {
         classificacioBoto.setForeground(Color.WHITE);
         classificacioBoto.setBackground(Color.BLACK);
         classificacioBoto.addMouseListener(new mouseListenerCustom());
+        classificacioBoto.setUI(new ButtonUICustom());
         panellBotons.add(classificacioBoto);
 
         historialBoto = new JButton("HISTORIAL");
@@ -88,6 +94,7 @@ public class MainJFrame extends JFrame {
         historialBoto.setForeground(Color.WHITE);
         historialBoto.setBackground(Color.BLACK);
         historialBoto.addMouseListener(new mouseListenerCustom());
+        historialBoto.setUI(new ButtonUICustom());
         panellBotons.add(historialBoto);
 
         ////////COMPONENTE JButton sortirButton
@@ -96,6 +103,7 @@ public class MainJFrame extends JFrame {
         sortirBoto.setForeground(Color.WHITE);
         sortirBoto.setBackground(Color.BLACK);
         sortirBoto.addMouseListener(new mouseListenerCustom());
+        sortirBoto.setUI(new ButtonUICustom());
         panellBotons.add(sortirBoto);
 
 
@@ -113,7 +121,7 @@ public class MainJFrame extends JFrame {
         //                                                                    //
         //          COMPONENTE JMenuBar barraMenu y COMPONENTES            //
         ////////////////////////////////////////////////////////////////////////
-        JMenuBar barraMenu = new JMenuBar();
+        barraMenu = new JMenuBar();
 
         JMenu generalMenu = new JMenu("MENU");
         barraMenu.setBackground(Color.BLACK);
@@ -143,6 +151,13 @@ public class MainJFrame extends JFrame {
         sortirBotoMenu.setForeground(Color.WHITE);
         sortirBotoMenu.setFont(FONT1);
 
+        novaPartidaBotoMenu.setUI(new ButtonUICustom());
+        classificacioBotoMenu.setUI(new ButtonUICustom());
+        sortirBotoMenu.setUI(new ButtonUICustom());
+        historialBotoMenu.setUI(new ButtonUICustom());
+        canviarDirectoriBotoMenu.setUI(new ButtonUICustom());
+        sortirBotoMenu.setUI(new ButtonUICustom());
+
         novaPartidaBotoMenu.addMouseListener(new mouseListenerCustom());
         classificacioBotoMenu.addMouseListener(new mouseListenerCustom());
         sortirBotoMenu.addMouseListener(new mouseListenerCustom());
@@ -165,7 +180,7 @@ public class MainJFrame extends JFrame {
         ////////////////////////////////////////////////////////////////////////
 
         iconesMenu = new JToolBar();
-        iconesMenu.setBackground(Color.green);
+        iconesMenu.setBackground(Color.BLACK);
         iconesMenu.setFloatable(false);
 
         novaPartidaIcona = new JButton();
@@ -174,7 +189,17 @@ public class MainJFrame extends JFrame {
         canviarDirectoriIcona = new JButton();
         sortirIcona = new JButton();
 
-        novaPartidaIcona.addMouseListener();
+        novaPartidaIcona.setUI(new ButtonUICustom());
+        classificacioIcona.setUI(new ButtonUICustom());
+        historialIcona.setUI(new ButtonUICustom());
+        canviarDirectoriIcona.setUI(new ButtonUICustom());
+        sortirIcona.setUI(new ButtonUICustom());
+
+        novaPartidaIcona.addMouseListener(new mouseListenerCustom());
+        classificacioIcona.addMouseListener(new mouseListenerCustom());
+        historialIcona.addMouseListener(new mouseListenerCustom());
+        canviarDirectoriIcona.addMouseListener(new mouseListenerCustom());
+        sortirIcona.addMouseListener(new mouseListenerCustom());
 
         try {
             classificacioIcona.setIcon(new ImageIcon(ImageIO.read(getClass().getResource("../icones/iconoHistorialSelectivo.jpg"))));
@@ -202,9 +227,9 @@ public class MainJFrame extends JFrame {
         //                SEPARADORES JSplitPane DE LA INTERFACE              //
         ////////////////////////////////////////////////////////////////////////
 
-        JSplitPane separadorNorte = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-        JSplitPane separadorSur = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-        JSplitPane separadorOeste = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+        separadorNorte = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+        separadorSur = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+        separadorOeste = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 
         separadorOeste.add(panellBotons);
         panellContinguts.add(separadorOeste, BorderLayout.WEST);
@@ -212,6 +237,10 @@ public class MainJFrame extends JFrame {
         panellContinguts.add(separadorNorte, BorderLayout.NORTH);
         separadorSur.setBottomComponent(botoContinuar);
         panellContinguts.add(separadorSur, BorderLayout.SOUTH);
+
+
+        carpetaImatges = new File("src/imatges");
+
     }
 
     ////////////////////////////////////////////////////////////////////////////
@@ -221,78 +250,81 @@ public class MainJFrame extends JFrame {
     //////////////////////////////////////////////////////////////////////////// 
     public class AreaVisualitzacio extends JPanel {
         public AreaVisualitzacio() {
+            panellStandby = new JPanel();
             imatgeUIB = new JLabel();
-            this.setBackground(Color.black);
+            panellStandby.add(imatgeUIB);
+            this.setBackground(Color.BLACK);
+
             try {
                 imatgeUIB.setIcon(new ImageIcon(ImageIO.read(getClass().getResource("../icones/UIB.jpg"))));
             } catch (IOException e) {
                 System.out.println(e.getMessage());
             }
-            add(imatgeUIB);
-            imatgeUIB.setVisible(true);
-
+            add(panellStandby);
         }
     }
 
     private JTextArea obtenirResultats() {
         areaVisualitzacioResultats = new JTextArea();
-        areaVisualitzacioResultats.setColumns(3);
         areaVisualitzacioResultats.setFont(FONT2);
         areaVisualitzacioResultats.setBackground(Color.WHITE);
-        areaVisualitzacioResultats.append("HISTORIAL\n\n");
+        areaVisualitzacioResultats.setText("HISTORIAL");
 
-
-                return areaVisualitzacioResultats;
+        return areaVisualitzacioResultats;
     }
 
-    private File obtenerDirectorio() {
+    private void cambiarDirectorioImagenes() {
         JFileChooser ventanaSeleccion = new JFileChooser();
-        ventanaSeleccion.setDialogTitle("SELECCIONA/ESPECIFICA EL FICHERO");
+        ventanaSeleccion.setMultiSelectionEnabled(false);
+        ventanaSeleccion.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        ventanaSeleccion.setDialogTitle("SELECCIONA/ESPECIFICA EL directorio");
+
         int op = ventanaSeleccion.showSaveDialog(this);
         if (op == JFileChooser.APPROVE_OPTION) {
-            //obtención del nombre del fichero
-            return ventanaSeleccion.getSelectedFile();
+            carpetaImatges = ventanaSeleccion.getSelectedFile();
         }
-        return null;
     }
 
+    private File seleccionarImatgeRandom() {
+        List<Path> imatges = null;
+        try (Stream<Path> walk = Files.walk(carpetaImatges.toPath(), 5)) {
+            imatges = walk
+                    .filter(Files::isRegularFile)
+                    .filter(s -> s.getFileName().toString().substring(s.getFileName().toString().length() - 4, s.getFileName().toString().length() - 1).matches("\\.(jpg|png)$"))
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
+        return (imatges != null) ? imatges.get(new Random(imatges.size()).nextInt()).toFile() : null;
+    }
 
     private class mouseListenerCustom implements MouseListener {
-
         @Override
         public void mouseClicked(MouseEvent e) {
-if(e.getSource().equals(sortirIcona)) System.exit(0);
-if(e.getSource().equals(sortirBoto)) System.exit(0);
-if(e.getSource().equals(historialBoto) || e.getSource().equals(historialIcona)){
-    panellVisualitzacio.add(obtenirResultats());
-    panellVisualitzacio.setBackground(Color.WHITE);
-    imatgeUIB.setVisible(false);
-}
-if(e.getSource().equals(historialBotoMenu)){
-    panellVisualitzacio.add(obtenirResultats());
-    panellVisualitzacio.setBackground(Color.WHITE);
-    imatgeUIB.setVisible(false);
-}
         }
-
         @Override
         public void mousePressed(MouseEvent e) {
-
+            if (e.getSource().equals(sortirIcona)) System.exit(0);
+            if (e.getSource().equals(sortirBoto)) System.exit(0);
+            if (e.getSource().equals(sortirBotoMenu)) System.exit(0);
+            if (e.getSource().equals(historialBoto) || e.getSource().equals(historialIcona) || e.getSource().equals(historialBotoMenu)) {
+                panellVisualitzacio.add(obtenirResultats());
+                panellVisualitzacio.setBackground(Color.WHITE);
+                imatgeUIB.setVisible(false);
+            }
+            if (e.getSource().equals(canviarDirectoriIcona) || e.getSource().equals(canviarDirectoriBotoMenu)) {
+                cambiarDirectorioImagenes();
+            }
+//            if(e.getSource().equals())
         }
-
         @Override
         public void mouseReleased(MouseEvent e) {
-
         }
-
         @Override
         public void mouseEntered(MouseEvent e) {
-
         }
-
         @Override
         public void mouseExited(MouseEvent e) {
-
         }
     }
 }
