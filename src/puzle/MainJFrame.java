@@ -2,19 +2,27 @@ package puzle;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.border.LineBorder;
+import javax.swing.plaf.basic.BasicBorders;
+import javax.swing.text.NumberFormatter;
 import java.awt.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.text.Format;
+import java.text.NumberFormat;
+import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.List;
 
 public class MainJFrame extends JFrame {
+    private MainJFrame finestraMain;
     private JButton novaPartidaIcona, classificacioIcona, historialIcona, canviarDirectoriIcona, sortirIcona,
             sortirBoto, historialBoto, classificacioBoto, novaPartidaButton, botoContinuar;
     private JMenuItem novaPartidaBotoMenu, classificacioBotoMenu, historialBotoMenu, canviarDirectoriBotoMenu, sortirBotoMenu;
@@ -29,6 +37,7 @@ public class MainJFrame extends JFrame {
     private final Font FONT1 = new Font("arial", Font.BOLD, 14);
     private final Font FONT2 = new Font("arial", Font.BOLD, 18);
     private File carpetaImatges;
+    private Partida p;
 
 
     //MÉTODO MAIN
@@ -124,8 +133,10 @@ public class MainJFrame extends JFrame {
         barraMenu = new JMenuBar();
 
         JMenu generalMenu = new JMenu("MENU");
+
         barraMenu.setBackground(Color.BLACK);
         barraMenu.setForeground(Color.WHITE);
+
         generalMenu.setBackground(Color.black);
         generalMenu.setForeground(Color.WHITE);
 
@@ -138,15 +149,19 @@ public class MainJFrame extends JFrame {
         novaPartidaBotoMenu.setBackground(Color.black);
         novaPartidaBotoMenu.setForeground(Color.WHITE);
         novaPartidaBotoMenu.setFont(FONT1);
+
         classificacioBotoMenu.setBackground(Color.black);
         classificacioBotoMenu.setForeground(Color.WHITE);
         classificacioBotoMenu.setFont(FONT1);
+
         historialBotoMenu.setBackground(Color.black);
         historialBotoMenu.setForeground(Color.WHITE);
         historialBotoMenu.setFont(FONT1);
+
         canviarDirectoriBotoMenu.setBackground(Color.black);
         canviarDirectoriBotoMenu.setForeground(Color.WHITE);
         canviarDirectoriBotoMenu.setFont(FONT1);
+
         sortirBotoMenu.setBackground(Color.black);
         sortirBotoMenu.setForeground(Color.WHITE);
         sortirBotoMenu.setFont(FONT1);
@@ -218,6 +233,7 @@ public class MainJFrame extends JFrame {
         iconesMenu.add(sortirIcona);
 
         panellTop = new JPanel(new GridLayout(2, 1));
+
         panellTop.add(barraMenu);
         panellTop.add(iconesMenu);
 
@@ -238,9 +254,7 @@ public class MainJFrame extends JFrame {
         separadorSur.setBottomComponent(botoContinuar);
         panellContinguts.add(separadorSur, BorderLayout.SOUTH);
 
-
         carpetaImatges = new File("src/imatges");
-
     }
 
     ////////////////////////////////////////////////////////////////////////////
@@ -273,7 +287,7 @@ public class MainJFrame extends JFrame {
         return areaVisualitzacioResultats;
     }
 
-    private void cambiarDirectorioImagenes() {
+    private void canviarDirectoriImatges() {
         JFileChooser ventanaSeleccion = new JFileChooser();
         ventanaSeleccion.setMultiSelectionEnabled(false);
         ventanaSeleccion.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
@@ -302,29 +316,197 @@ public class MainJFrame extends JFrame {
         @Override
         public void mouseClicked(MouseEvent e) {
         }
+
         @Override
         public void mousePressed(MouseEvent e) {
-            if (e.getSource().equals(sortirIcona)) System.exit(0);
-            if (e.getSource().equals(sortirBoto)) System.exit(0);
-            if (e.getSource().equals(sortirBotoMenu)) System.exit(0);
+            if (e.getSource().equals(sortirIcona) || e.getSource().equals(sortirBoto) || e.getSource().equals(sortirBotoMenu))
+                System.exit(0);
             if (e.getSource().equals(historialBoto) || e.getSource().equals(historialIcona) || e.getSource().equals(historialBotoMenu)) {
                 panellVisualitzacio.add(obtenirResultats());
                 panellVisualitzacio.setBackground(Color.WHITE);
                 imatgeUIB.setVisible(false);
             }
             if (e.getSource().equals(canviarDirectoriIcona) || e.getSource().equals(canviarDirectoriBotoMenu)) {
-                cambiarDirectorioImagenes();
+                canviarDirectoriImatges();
             }
-//            if(e.getSource().equals())
+            if (e.getSource().equals(novaPartidaBotoMenu) || e.getSource().equals(novaPartidaButton) || e.getSource().equals(novaPartidaIcona))
+                new IntroduirDades(finestraMain);
+
         }
+
         @Override
         public void mouseReleased(MouseEvent e) {
         }
+
         @Override
         public void mouseEntered(MouseEvent e) {
         }
+
         @Override
         public void mouseExited(MouseEvent e) {
+        }
+    }
+
+
+    ////////////////////////////////////////////////////////////////////////////
+    //                                                                        //
+    //                     Panell per introduir les dades                     //
+    //                                                                        //
+    ////////////////////////////////////////////////////////////////////////////
+
+    private class IntroduirDades extends JDialog {
+        private JButton continuar;
+        private JFormattedTextField subHoritzontal, subVertical;
+        private JTextField nom;
+        private JLabel nomLabel, subHLabel, subVLabel;
+        private JPanel camps;
+
+        public IntroduirDades(Frame owner) {
+            super(owner, true);
+            setTitle("INTRODUCCIÓ DE DADES");
+            setLayout(new BorderLayout());
+            crearVista();
+           setLocationRelativeTo(MainJFrame.this);
+           setVisible(true);
+        }
+
+        private void crearVista() {
+            camps = new JPanel(new GridLayout(3, 2));
+
+            nom = new JTextField();
+            nom.setFont(FONT1);
+            nom.setBackground(Color.white);
+            nom.setForeground(Color.BLACK);
+
+            subHoritzontal = new JFormatedTextFieldCustom();
+            subHoritzontal.setFont(FONT1);
+            subHoritzontal.setBackground(Color.white);
+            subHoritzontal.setForeground(Color.BLACK);
+
+            subVertical = new JFormatedTextFieldCustom();
+            subVertical.setFont(FONT1);
+            subVertical.setBackground(Color.white);
+            subVertical.setForeground(Color.BLACK);
+
+            nomLabel = new JLabel("NOM JUGADOR");
+            nomLabel.setFont(FONT1);
+            nomLabel.setBackground(Color.black);
+            nomLabel.setForeground(Color.WHITE);
+            nomLabel.setBorder(new LineBorder(Color.WHITE));
+            nomLabel.setOpaque(true);
+
+            subHLabel = new JLabel("NOMBRE DE SUBDIVISIONS HORITZONTALS");
+            subHLabel.setFont(FONT1);
+            subHLabel.setBackground(Color.BLACK);
+            subHLabel.setForeground(Color.WHITE);
+            subHLabel.setBorder(new LineBorder(Color.WHITE));
+            subHLabel.setOpaque(true);
+
+            subVLabel = new JLabel("NOMBRE DE SUBDIVISIONS VERTICALS");
+            subVLabel.setFont(FONT1);
+            subVLabel.setBackground(Color.BLACK);
+            subVLabel.setForeground(Color.WHITE);
+            subVLabel.setBorder(new LineBorder(Color.WHITE));
+            subVLabel.setOpaque(true);
+
+            continuar = new JButton("CONTINUAR");
+            continuar.setFont(FONT1);
+
+            continuar.addMouseListener(new MouseListener() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+
+                }
+
+                @Override
+                public void mousePressed(MouseEvent e) {
+                if(checkdatos()){
+                    setVisible(false);
+//                 MainJFrame.this.comensaPartida();
+                }
+                }
+
+                @Override
+                public void mouseReleased(MouseEvent e) {
+
+                }
+
+                @Override
+                public void mouseEntered(MouseEvent e) {
+
+                }
+
+                @Override
+                public void mouseExited(MouseEvent e) {
+
+                }
+            });
+
+            camps.add(nomLabel);
+            camps.add(nom);
+            camps.add(subHLabel);
+            camps.add(subHoritzontal);
+            camps.add(subVLabel);
+            camps.add(subVertical);
+            add(camps);
+            add(continuar, BorderLayout.SOUTH);
+            setSize(700,150);
+        }
+        private void guardarDades(){
+            if(p == null) p = new Partida();
+            MainJFrame.this.p.setJugador(nom.getText());
+            MainJFrame.this.p.setDivisionsHoritzaontals(Integer.parseInt(subHoritzontal.getText()));
+            MainJFrame.this.p.setDivisionsVerticals(Integer.parseInt(subVertical.getText()));
+        }
+        private boolean checkdatos(){
+            boolean resultat = true;
+            String missatge = "";
+            if(nom.getText().equals("")){
+                missatge += "* Nom no pot estar buit\n";
+                resultat = false;
+            }
+            if(subHoritzontal.getText().equals("")){
+                missatge += "* Divisions horitzontals no pot estar buit\n";
+                resultat = false;
+            } else if (Integer.parseInt(subHoritzontal.getText()) <1) {
+                missatge += "* Divisions horitzontals no pot ser menor que 1\n";
+                resultat = false;
+            }
+            if(subVertical.getText().equals("")){
+                missatge += "* Divisions verticals no pot estar buit\n";
+                resultat = false;
+            }else if(Integer.parseInt(subVertical.getText()) <1){
+                missatge += "* Divisions verticals no pot ser menor que 1\n";
+                resultat = false;
+            }
+            if(!resultat) JOptionPane.showMessageDialog(this, missatge, "Error", JOptionPane.ERROR_MESSAGE);
+            return resultat;
+        }
+        private class JFormatedTextFieldCustom extends JFormattedTextField{
+
+            public JFormatedTextFieldCustom() {
+                create();
+            }
+            private void create(){
+                NumberFormatter formatter = new NumberFormatter(NumberFormat.getInstance());
+                formatter.setAllowsInvalid(false);
+                formatter.setValueClass(Integer.class);
+                setFormatter(formatter);
+                this.addKeyListener(new KeyListener() {
+                    @Override
+                    public void keyTyped(KeyEvent e) {
+                    }
+                    @Override
+                    public void keyPressed(KeyEvent e) {
+                        if(e.getKeyCode() == KeyEvent.VK_BACK_SPACE && getText().length() == 1){
+                            setText("0");
+                        }
+                    }
+                    @Override
+                    public void keyReleased(KeyEvent e) {
+                    }
+                });
+            }
         }
     }
 }

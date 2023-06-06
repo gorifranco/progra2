@@ -1,13 +1,3 @@
-/*
-CLASE lecturaDatos
-
-AGLUTINA LAS DECLARACIONES Y FUNCIONALIDADES PARA GESTIONAR LA LECTURA DE
-DATOS A TRAVÉS DE UN CONTENEDOR JDialog
-
-TALLER 2 - PROGRAMACIÓN II - CURSO 2020-2021 - UIB
-autor: Juan Montes de Oca
- */
-
 package puzle;
 
 import javax.swing.*;
@@ -15,7 +5,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class lecturaDatos extends JDialog {
+public class LecturaDatos extends JDialog {
     //atributo array de componentes JTextField que representarán los valores
     //introducidos a través del contenedor JDialog
     private JTextField[] datos;
@@ -26,13 +16,13 @@ public class lecturaDatos extends JDialog {
     //MÉTODO CONSTRUCTOR
     //el parámetro frame representa el contenedor JFrame desde el que se le ha
     //llevado a cabo la instanciación, y el parámetro campos representan los
-    //literales de los conceptos demandados para introducir     
-    public lecturaDatos(JFrame frame, String[] campos) {
+    //literales de los conceptos demandados para introducir
+    public LecturaDatos(JFrame frame, String[] campos) {
         super(frame, true);
         setTitle("INTRODUCCIÓN DATOS");
 
 
-        //el número de componentes de campos (número de conceptos) representa
+        //el número de componentes de campos (número de conceptos) representaº
         //el número de valores a introducir
         numeroValores = campos.length;
 
@@ -52,7 +42,7 @@ public class lecturaDatos extends JDialog {
         //literales de los conceptos a introducir, estableciendose la relación
         //de una componente JLabel para cada concepto
         JLabel[] conceptos = new JLabel[numeroValores];
-        //declaració de un array de contenedores JPanel, en número igual al 
+        //declaració de un array de contenedores JPanel, en número igual al
         //número de valores, para introducir en cada uno de ellos, una
         //de las componentes JLabel, del array conceptos, y una de las
         //componentes JTextField del array datos
@@ -64,12 +54,12 @@ public class lecturaDatos extends JDialog {
         //etiqueta JLabel y componente JTextField, para acabar introduciendo
         //el contenedor JLabel en el panel de contenidos del contenedor JDialog
         for (int indice = 0; indice < datos.length; indice++) {
-            //instanciación de los diferentes arrays 
+            //instanciación de los diferentes arrays
             conceptos[indice] = new JLabel(campos[indice]);
             datos[indice] = new JTextField(5);
             datos[indice].setText("");
             paneles[indice] = new JPanel();
-            //introducción en el contenedor JPanel indice-ésimo de la 
+            //introducción en el contenedor JPanel indice-ésimo de la
             //componente JLabel indice-ésima y de la componente JTextField
             //indice-ésima
             paneles[indice].add(conceptos[indice]);
