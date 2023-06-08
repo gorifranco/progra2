@@ -4,6 +4,8 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import javax.swing.plaf.basic.BasicBorders;
+import javax.swing.plaf.metal.MetalButtonUI;
+import javax.swing.plaf.metal.MetalLookAndFeel;
 import javax.swing.text.NumberFormatter;
 import java.awt.*;
 import java.awt.event.KeyEvent;
@@ -16,6 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.Format;
 import java.text.NumberFormat;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -45,6 +48,8 @@ public class MainJFrame extends JFrame {
         try {
             javax.swing.UIManager.setLookAndFeel(
                     javax.swing.UIManager.getCrossPlatformLookAndFeelClassName());
+            UIDefaults a = UIManager.getLookAndFeelDefaults();
+//            System.out.println(a.getColor("Button.focus"));
         } catch (Exception error) {
             System.out.println("NO SE HA ESTABLECIDO LA APARIENCIA DESEADA: " + error);
         }
@@ -131,6 +136,8 @@ public class MainJFrame extends JFrame {
         //          COMPONENTE JMenuBar barraMenu y COMPONENTES            //
         ////////////////////////////////////////////////////////////////////////
         barraMenu = new JMenuBar();
+        barraMenu.setBorder(new LineBorder(Color.WHITE));
+
 
         JMenu generalMenu = new JMenu("MENU");
 
@@ -197,6 +204,7 @@ public class MainJFrame extends JFrame {
         iconesMenu = new JToolBar();
         iconesMenu.setBackground(Color.BLACK);
         iconesMenu.setFloatable(false);
+        iconesMenu.setBorder(new LineBorder(Color.WHITE));
 
         novaPartidaIcona = new JButton();
         classificacioIcona = new JButton();
@@ -233,6 +241,7 @@ public class MainJFrame extends JFrame {
         iconesMenu.add(sortirIcona);
 
         panellTop = new JPanel(new GridLayout(2, 1));
+
 
         panellTop.add(barraMenu);
         panellTop.add(iconesMenu);
@@ -479,6 +488,7 @@ public class MainJFrame extends JFrame {
                 missatge += "* Divisions verticals no pot ser menor que 1\n";
                 resultat = false;
             }
+            JOptionPane a = new JOptionPane();
             if(!resultat) JOptionPane.showMessageDialog(this, missatge, "Error", JOptionPane.ERROR_MESSAGE);
             return resultat;
         }
