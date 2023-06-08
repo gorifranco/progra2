@@ -1,5 +1,7 @@
 package puzle;
 
+import com.sun.jdi.IntegerValue;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.LineBorder;
@@ -138,7 +140,6 @@ public class MainJFrame extends JFrame {
         barraMenu = new JMenuBar();
         barraMenu.setBorder(new LineBorder(Color.WHITE));
 
-
         JMenu generalMenu = new JMenu("MENU");
 
         barraMenu.setBackground(Color.BLACK);
@@ -146,46 +147,14 @@ public class MainJFrame extends JFrame {
 
         generalMenu.setBackground(Color.black);
         generalMenu.setForeground(Color.WHITE);
+        generalMenu.getPopupMenu().setBackground(Color.BLACK);
+        generalMenu.getPopupMenu().setBorder(new LineBorder(Color.WHITE));
 
-        novaPartidaBotoMenu = new JMenuItem("PARTIDA NOVA");
-        classificacioBotoMenu = new JMenuItem("CLASSIFICACIÓ GENERAL");
-        historialBotoMenu = new JMenuItem("HISTORIAL");
-        canviarDirectoriBotoMenu = new JMenuItem("CANVIAR DIRECTORI D'IMATGES");
-        sortirBotoMenu = new JMenuItem("SORTIR");
-
-        novaPartidaBotoMenu.setBackground(Color.black);
-        novaPartidaBotoMenu.setForeground(Color.WHITE);
-        novaPartidaBotoMenu.setFont(FONT1);
-
-        classificacioBotoMenu.setBackground(Color.black);
-        classificacioBotoMenu.setForeground(Color.WHITE);
-        classificacioBotoMenu.setFont(FONT1);
-
-        historialBotoMenu.setBackground(Color.black);
-        historialBotoMenu.setForeground(Color.WHITE);
-        historialBotoMenu.setFont(FONT1);
-
-        canviarDirectoriBotoMenu.setBackground(Color.black);
-        canviarDirectoriBotoMenu.setForeground(Color.WHITE);
-        canviarDirectoriBotoMenu.setFont(FONT1);
-
-        sortirBotoMenu.setBackground(Color.black);
-        sortirBotoMenu.setForeground(Color.WHITE);
-        sortirBotoMenu.setFont(FONT1);
-
-        novaPartidaBotoMenu.setUI(new ButtonUICustom());
-        classificacioBotoMenu.setUI(new ButtonUICustom());
-        sortirBotoMenu.setUI(new ButtonUICustom());
-        historialBotoMenu.setUI(new ButtonUICustom());
-        canviarDirectoriBotoMenu.setUI(new ButtonUICustom());
-        sortirBotoMenu.setUI(new ButtonUICustom());
-
-        novaPartidaBotoMenu.addMouseListener(new mouseListenerCustom());
-        classificacioBotoMenu.addMouseListener(new mouseListenerCustom());
-        sortirBotoMenu.addMouseListener(new mouseListenerCustom());
-        historialBotoMenu.addMouseListener(new mouseListenerCustom());
-        canviarDirectoriBotoMenu.addMouseListener(new mouseListenerCustom());
-        sortirBotoMenu.addMouseListener(new mouseListenerCustom());
+        novaPartidaBotoMenu = crearJMenuItem("PARTIDA NOVA");
+        classificacioBotoMenu = crearJMenuItem("CLASSIFICACIÓ GENERAL");
+        historialBotoMenu = crearJMenuItem("HISTORIAL");
+        canviarDirectoriBotoMenu = crearJMenuItem("CANVIAR DIRECTORI D'IMATGES");
+        sortirBotoMenu = crearJMenuItem("SORTIR");
 
         generalMenu.add(novaPartidaBotoMenu);
         generalMenu.add(classificacioBotoMenu);
@@ -207,22 +176,29 @@ public class MainJFrame extends JFrame {
         iconesMenu.setBorder(new LineBorder(Color.WHITE));
 
         novaPartidaIcona = new JButton();
-        classificacioIcona = new JButton();
-        historialIcona = new JButton();
-        canviarDirectoriIcona = new JButton();
-        sortirIcona = new JButton();
-
         novaPartidaIcona.setUI(new ButtonUICustom());
-        classificacioIcona.setUI(new ButtonUICustom());
-        historialIcona.setUI(new ButtonUICustom());
-        canviarDirectoriIcona.setUI(new ButtonUICustom());
-        sortirIcona.setUI(new ButtonUICustom());
-
+        novaPartidaIcona.setToolTipText("Nova partida");
         novaPartidaIcona.addMouseListener(new mouseListenerCustom());
+
+        classificacioIcona = new JButton();
+        classificacioIcona.setUI(new ButtonUICustom());
         classificacioIcona.addMouseListener(new mouseListenerCustom());
+        classificacioIcona.setToolTipText("Classificació");
+
+        historialIcona = new JButton();
+        historialIcona.setUI(new ButtonUICustom());
         historialIcona.addMouseListener(new mouseListenerCustom());
+        historialIcona.setToolTipText("Historial");
+
+        canviarDirectoriIcona = new JButton();
+        canviarDirectoriIcona.setUI(new ButtonUICustom());
         canviarDirectoriIcona.addMouseListener(new mouseListenerCustom());
+        canviarDirectoriIcona.setToolTipText("Canviar directori");
+
+        sortirIcona = new JButton();
+        sortirIcona.setUI(new ButtonUICustom());
         sortirIcona.addMouseListener(new mouseListenerCustom());
+        sortirIcona.setToolTipText("Sortir");
 
         try {
             classificacioIcona.setIcon(new ImageIcon(ImageIO.read(getClass().getResource("../icones/iconoHistorialSelectivo.jpg"))));
@@ -321,6 +297,21 @@ public class MainJFrame extends JFrame {
         return (imatges != null) ? imatges.get(new Random(imatges.size()).nextInt()).toFile() : null;
     }
 
+    //////////////////////////////////
+    //        CREAR MENU ITEMS      //
+    //////////////////////////////////
+
+    private JMenuItem crearJMenuItem(String text){
+        JMenuItem a = new JMenuItem(text);
+        a.setBackground(Color.black);
+        a.setForeground(Color.WHITE);
+        a.setFont(FONT1);
+        a.setBorder(new LineBorder(Color.WHITE));
+        a.setUI(new ButtonUICustom());
+        a.addMouseListener(new mouseListenerCustom());
+        return a;
+    }
+
     private class mouseListenerCustom implements MouseListener {
         @Override
         public void mouseClicked(MouseEvent e) {
@@ -339,7 +330,7 @@ public class MainJFrame extends JFrame {
                 canviarDirectoriImatges();
             }
             if (e.getSource().equals(novaPartidaBotoMenu) || e.getSource().equals(novaPartidaButton) || e.getSource().equals(novaPartidaIcona))
-                new IntroduirDades(finestraMain);
+                new IntroduirDades("INTRODUIR DADES");
 
         }
 
@@ -370,13 +361,14 @@ public class MainJFrame extends JFrame {
         private JLabel nomLabel, subHLabel, subVLabel;
         private JPanel camps;
 
-        public IntroduirDades(Frame owner) {
-            super(owner, true);
-            setTitle("INTRODUCCIÓ DE DADES");
+        public IntroduirDades(String title) {
+            setModal(false);
+            setTitle(title);
             setLayout(new BorderLayout());
             crearVista();
-           setLocationRelativeTo(MainJFrame.this);
-           setVisible(true);
+            setLocationRelativeTo(MainJFrame.this);
+            setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+            setVisible(true);
         }
 
         private void crearVista() {
@@ -420,17 +412,18 @@ public class MainJFrame extends JFrame {
 
             continuar = new JButton("CONTINUAR");
             continuar.setFont(FONT1);
+            continuar.setUI(new ButtonUICustom());
 
             continuar.addMouseListener(new MouseListener() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
 
                 }
-
                 @Override
                 public void mousePressed(MouseEvent e) {
                 if(checkdatos()){
-                    setVisible(false);
+                    dispose();
+                    guardarDades();
 //                 MainJFrame.this.comensaPartida();
                 }
                 }
@@ -492,6 +485,8 @@ public class MainJFrame extends JFrame {
             if(!resultat) JOptionPane.showMessageDialog(this, missatge, "Error", JOptionPane.ERROR_MESSAGE);
             return resultat;
         }
+
+
         private class JFormatedTextFieldCustom extends JFormattedTextField{
 
             public JFormatedTextFieldCustom() {
@@ -500,8 +495,8 @@ public class MainJFrame extends JFrame {
             private void create(){
                 NumberFormatter formatter = new NumberFormatter(NumberFormat.getInstance());
                 formatter.setAllowsInvalid(false);
-                formatter.setValueClass(Integer.class);
-                setFormatter(formatter);
+                formatter.setValueClass(IntegerValue.class);
+                this.setFormatter(formatter);
                 this.addKeyListener(new KeyListener() {
                     @Override
                     public void keyTyped(KeyEvent e) {
@@ -516,6 +511,16 @@ public class MainJFrame extends JFrame {
                     public void keyReleased(KeyEvent e) {
                     }
                 });
+            }
+        }
+
+        private class JFT2 extends JFormattedTextField{
+
+            public JFT2() {
+                NumberFormatter f = new NumberFormatter();
+                f.setAllowsInvalid(false);
+                f.setValueClass(Integer.class);
+                setFormatter(f);
             }
         }
     }
