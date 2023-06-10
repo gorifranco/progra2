@@ -12,10 +12,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.security.PrivateKey;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -36,9 +33,10 @@ public class MainJFrame extends JFrame {
     private JLabel imatgeUIB;
     private final Font FONT1 = new Font("arial", Font.BOLD, 14);
     private final Font FONT2 = new Font("arial", Font.BOLD, 18);
-    private File carpetaImatges;
+    private File CARPETAIMATGES = new File("src/imatges");
     private Partida p;
     private JPanel[] panellsImatges;
+    private boolean[] posicionsCorrectes;
 
 
     //MÉTODO MAIN
@@ -235,8 +233,6 @@ public class MainJFrame extends JFrame {
         panellContinguts.add(separadorNorte, BorderLayout.NORTH);
         separadorSur.setBottomComponent(botoContinuar);
         panellContinguts.add(separadorSur, BorderLayout.SOUTH);
-
-        carpetaImatges = new File("src/imatges");
     }
 
     ////////////////////////////////////////////////////////////////////////////
@@ -297,21 +293,22 @@ public class MainJFrame extends JFrame {
 
         int op = ventanaSeleccion.showSaveDialog(this);
         if (op == JFileChooser.APPROVE_OPTION) {
-            carpetaImatges = ventanaSeleccion.getSelectedFile();
+            CARPETAIMATGES = ventanaSeleccion.getSelectedFile();
         }
     }
 
     private File seleccionarImatgeRandom() {
         List<Path> imatges = null;
-        try (Stream<Path> walk = Files.walk(carpetaImatges.toPath(), 5)) {
+        try (Stream<Path> walk = Files.walk(CARPETAIMATGES.toPath(), 3)) {
             imatges = walk
                     .filter(Files::isRegularFile)
-                    .filter(s -> s.getFileName().toString().substring(s.getFileName().toString().length() - 4, s.getFileName().toString().length() - 1).matches("\\.(jpg|png)$"))
-                    .collect(Collectors.toList());
+                    .filter(s -> s.getFileName().toString().substring(s.getFileName().toString().length() - 4).matches("\\.(jpg|png)$"))
+                             .collect(Collectors.toList());
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }
-        return (imatges != null) ? imatges.get(new Random(imatges.size()).nextInt()).toFile() : null;
+
+        return (imatges != null) ? imatges.get(new Random().nextInt(imatges.size())).toFile() : null;
     }
 
     //////////////////////////////////
@@ -336,31 +333,60 @@ public class MainJFrame extends JFrame {
     //                                                                        //
     ////////////////////////////////////////////////////////////////////////////
 
-    private void crearPanellPartida() {
-        panellPartida = new JPanel();
+    private void crearPanellPartida(int horitzontal, int vertical) {
+        panellPartida = new JPanel(new GridLayout(horitzontal, vertical));
+        dividirImatge(seleccionarImatgeRandom(), horitzontal, vertical);
+        for (JPanel panellsImatge : panellsImatges) {
+            panellPartida.add(panellsImatge);
+        }
+        panellStandby.setVisible(false);
+        panellVisualitzacio.add(panellPartida);
     }
 
-    private void dividirImatges(File imatge, int horitzontal, int vertical) {
+
+    //xapa la imatge en trossos i fica aquests dins JPanels dins un array
+    private void dividirImatge(File imatge, int horitzontal, int vertical) {
+        BufferedImage im = null;
         try {
-            BufferedImage bi = ImageIO.read(imatge);
-            Image img = bi.getScaledInstance(600,400,Image.SCALE_SMOOTH);
 
-
-        }catch (IOException e){
+            im = (BufferedImage) ImageIO.read(imatge).getScaledInstance(600, 400, Image.SCALE_SMOOTH);
+        }catch(IOException e){
             System.out.println(e.getMessage());
         }
 
+        posicionsCorrectes = new boolean[horitzontal*vertical];
         panellsImatges = new JPanel[horitzontal*vertical];
-
+        int contador = 0;
         for (int i = 0; i < horitzontal; i++) {
             for (int j = 0; j < vertical; j++) {
-
+                Image subImg = im.getSubimage(i*600/horitzontal, i*400/vertical, 600/horitzontal, 400/vertical);
+                JPanel temp = new JPanel();
+                JLabel jlTemp = new JLabel();
+                jlTemp.setIcon(new ImageIcon(subImg));
+                temp.setName("c" + contador);
+                panellsImatges[contador++] = temp;
             }
-
         }
+        barallarImatges();
     }
 
     private void barallarImatges() {
+        Random r = new Random();
+        for (int i = 0; i < panellsImatges.length; i++) {
+            int j = r.nextInt(panellsImatges.length);
+            JPanel temp = panellsImatges[i];
+            panellsImatges[i] = panellsImatges[j];
+            panellsImatges[j] = temp;
+        }
+    }
+    private void comprobarPosicionsCorrectes(){
+        posicionsCorrectes = new boolean[panellsImatges.length];
+        for (int i = 0; i < panellsImatges.length; i++) {
+            if(panellsImatges[i].getName().substring(1).equals(Integer.toString(i))) posicionsCorrectes[i] = true;
+        }
+    }
+
+    private void comprobarPosicionsCorrectes(JPanel p1, JPanel p2){
 
     }
 
@@ -481,7 +507,7 @@ public class MainJFrame extends JFrame {
                     if (checkdatos()) {
                         dispose();
                         guardarDades();
-//                 MainJFrame.this.comensaPartida();
+                        MainJFrame.this.crearPanellPartida(Integer.parseInt(subHoritzontal.getText()), Integer.parseInt(subVertical.getText()));
                     }
                 }
 
