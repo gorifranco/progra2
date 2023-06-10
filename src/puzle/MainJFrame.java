@@ -1,26 +1,16 @@
 package puzle;
 
-import com.sun.jdi.IntegerValue;
-
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.LineBorder;
-import javax.swing.plaf.basic.BasicBorders;
-import javax.swing.plaf.metal.MetalButtonUI;
-import javax.swing.plaf.metal.MetalLookAndFeel;
-import javax.swing.text.NumberFormatter;
+import javax.swing.text.*;
 import java.awt.*;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.text.Format;
-import java.text.NumberFormat;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -131,6 +121,7 @@ public class MainJFrame extends JFrame {
         botoContinuar.setFont(FONT1);
         botoContinuar.setForeground(Color.WHITE);
         botoContinuar.setBackground(Color.BLACK);
+        botoContinuar.setUI(new ButtonUICustom());
         botoContinuar.addMouseListener(new mouseListenerCustom());
 
         ////////////////////////////////////////////////////////////////////////
@@ -252,6 +243,7 @@ public class MainJFrame extends JFrame {
             panellStandby = new JPanel();
             imatgeUIB = new JLabel();
             panellStandby.add(imatgeUIB);
+            panellStandby.setBackground(Color.BLACK);
             this.setBackground(Color.BLACK);
 
             try {
@@ -267,7 +259,16 @@ public class MainJFrame extends JFrame {
         areaVisualitzacioResultats = new JTextArea();
         areaVisualitzacioResultats.setFont(FONT2);
         areaVisualitzacioResultats.setBackground(Color.WHITE);
+        areaVisualitzacioResultats.setEditable(false);
+        areaVisualitzacioResultats.setColumns(3);
         areaVisualitzacioResultats.setText("HISTORIAL");
+
+        JLabel jl1 = new JLabel("fgchsdvfhsdf");
+        jl1.setBounds(10,10,100,30);
+        areaVisualitzacioResultats.add(jl1);
+        areaVisualitzacioResultats.add(new JLabel("fgcasthctf\t"));
+        areaVisualitzacioResultats.add(new JLabel("fgcthctf\t"));
+
 
         return areaVisualitzacioResultats;
     }
@@ -301,7 +302,7 @@ public class MainJFrame extends JFrame {
     //        CREAR MENU ITEMS      //
     //////////////////////////////////
 
-    private JMenuItem crearJMenuItem(String text){
+    private JMenuItem crearJMenuItem(String text) {
         JMenuItem a = new JMenuItem(text);
         a.setBackground(Color.black);
         a.setForeground(Color.WHITE);
@@ -322,9 +323,9 @@ public class MainJFrame extends JFrame {
             if (e.getSource().equals(sortirIcona) || e.getSource().equals(sortirBoto) || e.getSource().equals(sortirBotoMenu))
                 System.exit(0);
             if (e.getSource().equals(historialBoto) || e.getSource().equals(historialIcona) || e.getSource().equals(historialBotoMenu)) {
-                panellVisualitzacio.add(obtenirResultats());
+                panellVisualitzacio.add(obtenirResultats(), BorderLayout.NORTH);
                 panellVisualitzacio.setBackground(Color.WHITE);
-                imatgeUIB.setVisible(false);
+                panellStandby.setVisible(false);
             }
             if (e.getSource().equals(canviarDirectoriIcona) || e.getSource().equals(canviarDirectoriBotoMenu)) {
                 canviarDirectoriImatges();
@@ -356,7 +357,7 @@ public class MainJFrame extends JFrame {
 
     private class IntroduirDades extends JDialog {
         private JButton continuar;
-        private JFormattedTextField subHoritzontal, subVertical;
+        private JTextField subHoritzontal, subVertical;
         private JTextField nom;
         private JLabel nomLabel, subHLabel, subVLabel;
         private JPanel camps;
@@ -379,15 +380,17 @@ public class MainJFrame extends JFrame {
             nom.setBackground(Color.white);
             nom.setForeground(Color.BLACK);
 
-            subHoritzontal = new JFormatedTextFieldCustom();
+            subHoritzontal = new JTextField();
             subHoritzontal.setFont(FONT1);
             subHoritzontal.setBackground(Color.white);
             subHoritzontal.setForeground(Color.BLACK);
+            ((PlainDocument) subHoritzontal.getDocument()).setDocumentFilter(new FiltroInt());
 
-            subVertical = new JFormatedTextFieldCustom();
+            subVertical = new JTextField();
             subVertical.setFont(FONT1);
             subVertical.setBackground(Color.white);
             subVertical.setForeground(Color.BLACK);
+            ((PlainDocument) subVertical.getDocument()).setDocumentFilter(new FiltroInt());
 
             nomLabel = new JLabel("NOM JUGADOR");
             nomLabel.setFont(FONT1);
@@ -419,13 +422,14 @@ public class MainJFrame extends JFrame {
                 public void mouseClicked(MouseEvent e) {
 
                 }
+
                 @Override
                 public void mousePressed(MouseEvent e) {
-                if(checkdatos()){
-                    dispose();
-                    guardarDades();
+                    if (checkdatos()) {
+                        dispose();
+                        guardarDades();
 //                 MainJFrame.this.comensaPartida();
-                }
+                    }
                 }
 
                 @Override
@@ -452,76 +456,97 @@ public class MainJFrame extends JFrame {
             camps.add(subVertical);
             add(camps);
             add(continuar, BorderLayout.SOUTH);
-            setSize(700,150);
+            setSize(700, 150);
         }
-        private void guardarDades(){
-            if(p == null) p = new Partida();
+
+        private void guardarDades() {
+            if (p == null) p = new Partida();
             MainJFrame.this.p.setJugador(nom.getText());
             MainJFrame.this.p.setDivisionsHoritzaontals(Integer.parseInt(subHoritzontal.getText()));
             MainJFrame.this.p.setDivisionsVerticals(Integer.parseInt(subVertical.getText()));
         }
-        private boolean checkdatos(){
+
+        private boolean checkdatos() {
             boolean resultat = true;
             String missatge = "";
-            if(nom.getText().equals("")){
+            if (nom.getText().equals("")) {
                 missatge += "* Nom no pot estar buit\n";
                 resultat = false;
             }
-            if(subHoritzontal.getText().equals("")){
+            if (subHoritzontal.getText().equals("")) {
                 missatge += "* Divisions horitzontals no pot estar buit\n";
                 resultat = false;
-            } else if (Integer.parseInt(subHoritzontal.getText()) <1) {
+            } else if (Integer.parseInt(subHoritzontal.getText()) < 1) {
                 missatge += "* Divisions horitzontals no pot ser menor que 1\n";
                 resultat = false;
             }
-            if(subVertical.getText().equals("")){
+            if (subVertical.getText().equals("")) {
                 missatge += "* Divisions verticals no pot estar buit\n";
                 resultat = false;
-            }else if(Integer.parseInt(subVertical.getText()) <1){
+            } else if (Integer.parseInt(subVertical.getText()) < 1) {
                 missatge += "* Divisions verticals no pot ser menor que 1\n";
                 resultat = false;
             }
             JOptionPane a = new JOptionPane();
-            if(!resultat) JOptionPane.showMessageDialog(this, missatge, "Error", JOptionPane.ERROR_MESSAGE);
+            if (!resultat) JOptionPane.showMessageDialog(this, missatge, "Error", JOptionPane.ERROR_MESSAGE);
             return resultat;
         }
 
+        class FiltroInt extends DocumentFilter {
+            @Override
+            public void insertString(FilterBypass fb, int offset, String string,
+                                     AttributeSet attr) throws BadLocationException {
 
-        private class JFormatedTextFieldCustom extends JFormattedTextField{
+                Document doc = fb.getDocument();
+                StringBuilder sb = new StringBuilder();
+                sb.append(doc.getText(0, doc.getLength()));
+                sb.insert(offset, string);
 
-            public JFormatedTextFieldCustom() {
-                create();
+                if (test(sb.toString())) {
+                    super.insertString(fb, offset, string, attr);
+                }
             }
-            private void create(){
-                NumberFormatter formatter = new NumberFormatter(NumberFormat.getInstance());
-                formatter.setAllowsInvalid(false);
-                formatter.setValueClass(IntegerValue.class);
-                this.setFormatter(formatter);
-                this.addKeyListener(new KeyListener() {
-                    @Override
-                    public void keyTyped(KeyEvent e) {
-                    }
-                    @Override
-                    public void keyPressed(KeyEvent e) {
-                        if(e.getKeyCode() == KeyEvent.VK_BACK_SPACE && getText().length() == 1){
-                            setText("0");
-                        }
-                    }
-                    @Override
-                    public void keyReleased(KeyEvent e) {
-                    }
-                });
+
+            private boolean test(String text) {
+                try {
+                    Integer.parseInt(text);
+                    return true;
+                } catch (NumberFormatException e) {
+                    return false;
+                }
             }
-        }
 
-        private class JFT2 extends JFormattedTextField{
+            @Override
+            public void replace(FilterBypass fb, int offset, int length, String text,
+                                AttributeSet attrs) throws BadLocationException {
 
-            public JFT2() {
-                NumberFormatter f = new NumberFormatter();
-                f.setAllowsInvalid(false);
-                f.setValueClass(Integer.class);
-                setFormatter(f);
+                Document doc = fb.getDocument();
+                StringBuilder sb = new StringBuilder();
+                sb.append(doc.getText(0, doc.getLength()));
+                sb.replace(offset, offset + length, text);
+
+                if (test(sb.toString())) {
+                    super.replace(fb, offset, length, text, attrs);
+                }
+            }
+
+            @Override
+            public void remove(FilterBypass fb, int offset, int length)
+                    throws BadLocationException {
+                Document doc = fb.getDocument();
+                StringBuilder sb = new StringBuilder();
+                sb.append(doc.getText(0, doc.getLength()));
+                sb.delete(offset, offset + length);
+
+                if (sb.toString().length() == 0) {
+                    super.replace(fb, offset, length, "", null);
+                } else {
+                    if (test(sb.toString())) {
+                        super.remove(fb, offset, length);
+                    }
+                }
             }
         }
     }
 }
+
