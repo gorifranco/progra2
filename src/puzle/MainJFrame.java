@@ -7,10 +7,15 @@ import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.PrivateKey;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -23,7 +28,7 @@ public class MainJFrame extends JFrame {
     private JMenuItem novaPartidaBotoMenu, classificacioBotoMenu, historialBotoMenu, canviarDirectoriBotoMenu, sortirBotoMenu;
     private JMenuBar barraMenu;
     private JTextArea areaVisualitzacioResultats;
-    private JPanel panellTop, panellStandby, panellBotons;
+    private JPanel panellTop, panellStandby, panellBotons, panellHistorial, panellPartida;
     private JSplitPane separadorNorte, separadorSur, separadorOeste;
     private JToolBar iconesMenu;
     private Container panellContinguts;
@@ -33,6 +38,7 @@ public class MainJFrame extends JFrame {
     private final Font FONT2 = new Font("arial", Font.BOLD, 18);
     private File carpetaImatges;
     private Partida p;
+    private JPanel[] panellsImatges;
 
 
     //MÉTODO MAIN
@@ -240,6 +246,7 @@ public class MainJFrame extends JFrame {
     //////////////////////////////////////////////////////////////////////////// 
     public class AreaVisualitzacio extends JPanel {
         public AreaVisualitzacio() {
+            this.setLayout(new BorderLayout());
             panellStandby = new JPanel();
             imatgeUIB = new JLabel();
             panellStandby.add(imatgeUIB);
@@ -255,22 +262,31 @@ public class MainJFrame extends JFrame {
         }
     }
 
-    private JTextArea obtenirResultats() {
+    private JPanel crearPanellHistorial() {
+        panellHistorial = new JPanel();
+        panellHistorial.setBackground(Color.WHITE);
+
         areaVisualitzacioResultats = new JTextArea();
-        areaVisualitzacioResultats.setFont(FONT2);
         areaVisualitzacioResultats.setBackground(Color.WHITE);
         areaVisualitzacioResultats.setEditable(false);
-        areaVisualitzacioResultats.setColumns(3);
-        areaVisualitzacioResultats.setText("HISTORIAL");
+        areaVisualitzacioResultats.setText("\tHISTORIAL\n\n");
+        areaVisualitzacioResultats.setFont(FONT1);
+        areaVisualitzacioResultats.setTabSize(20);
 
-        JLabel jl1 = new JLabel("fgchsdvfhsdf");
-        jl1.setBounds(10,10,100,30);
-        areaVisualitzacioResultats.add(jl1);
-        areaVisualitzacioResultats.add(new JLabel("fgcasthctf\t"));
-        areaVisualitzacioResultats.add(new JLabel("fgcthctf\t"));
+        areaVisualitzacioResultats.append("JUGADOR: JUANfffffffd\t");
+        areaVisualitzacioResultats.append("-fecha: ufsdgdfgsa\t");
+        areaVisualitzacioResultats.append("-puntos: 65\n");
+        areaVisualitzacioResultats.append("JUGADOR: J\t");
+        areaVisualitzacioResultats.append("-fecha: ufsduksa\t");
+        areaVisualitzacioResultats.append("-puntos: 65\n");
+        areaVisualitzacioResultats.append("JUGADOR: JUAN\t");
+        areaVisualitzacioResultats.append("-fecha: ufsduksa\t");
+        areaVisualitzacioResultats.append("-puntos: 65");
+
+        panellHistorial.add(areaVisualitzacioResultats);
 
 
-        return areaVisualitzacioResultats;
+        return panellHistorial;
     }
 
     private void canviarDirectoriImatges() {
@@ -313,6 +329,42 @@ public class MainJFrame extends JFrame {
         return a;
     }
 
+
+    ////////////////////////////////////////////////////////////////////////////
+    //                                                                        //
+    //                          CREAR PANELL PARTIDA                          //
+    //                                                                        //
+    ////////////////////////////////////////////////////////////////////////////
+
+    private void crearPanellPartida() {
+        panellPartida = new JPanel();
+    }
+
+    private void dividirImatges(File imatge, int horitzontal, int vertical) {
+        try {
+            BufferedImage bi = ImageIO.read(imatge);
+            Image img = bi.getScaledInstance(600,400,Image.SCALE_SMOOTH);
+
+
+        }catch (IOException e){
+            System.out.println(e.getMessage());
+        }
+
+        panellsImatges = new JPanel[horitzontal*vertical];
+
+        for (int i = 0; i < horitzontal; i++) {
+            for (int j = 0; j < vertical; j++) {
+
+            }
+
+        }
+    }
+
+    private void barallarImatges() {
+
+    }
+
+
     private class mouseListenerCustom implements MouseListener {
         @Override
         public void mouseClicked(MouseEvent e) {
@@ -323,9 +375,9 @@ public class MainJFrame extends JFrame {
             if (e.getSource().equals(sortirIcona) || e.getSource().equals(sortirBoto) || e.getSource().equals(sortirBotoMenu))
                 System.exit(0);
             if (e.getSource().equals(historialBoto) || e.getSource().equals(historialIcona) || e.getSource().equals(historialBotoMenu)) {
-                panellVisualitzacio.add(obtenirResultats(), BorderLayout.NORTH);
-                panellVisualitzacio.setBackground(Color.WHITE);
                 panellStandby.setVisible(false);
+                panellVisualitzacio.add(crearPanellHistorial(), BorderLayout.CENTER);
+
             }
             if (e.getSource().equals(canviarDirectoriIcona) || e.getSource().equals(canviarDirectoriBotoMenu)) {
                 canviarDirectoriImatges();
@@ -347,7 +399,6 @@ public class MainJFrame extends JFrame {
         public void mouseExited(MouseEvent e) {
         }
     }
-
 
     ////////////////////////////////////////////////////////////////////////////
     //                                                                        //
@@ -379,6 +430,8 @@ public class MainJFrame extends JFrame {
             nom.setFont(FONT1);
             nom.setBackground(Color.white);
             nom.setForeground(Color.BLACK);
+            AbstractDocument ad = (AbstractDocument) nom.getDocument();
+            ad.setDocumentFilter(new FiltroSize());
 
             subHoritzontal = new JTextField();
             subHoritzontal.setFont(FONT1);
@@ -386,27 +439,27 @@ public class MainJFrame extends JFrame {
             subHoritzontal.setForeground(Color.BLACK);
             ((PlainDocument) subHoritzontal.getDocument()).setDocumentFilter(new FiltroInt());
 
-            subVertical = new JTextField();
+            subVertical = new JTextField(5);
             subVertical.setFont(FONT1);
             subVertical.setBackground(Color.white);
             subVertical.setForeground(Color.BLACK);
             ((PlainDocument) subVertical.getDocument()).setDocumentFilter(new FiltroInt());
 
-            nomLabel = new JLabel("NOM JUGADOR");
+            nomLabel = new JLabel("  NOM JUGADOR");
             nomLabel.setFont(FONT1);
             nomLabel.setBackground(Color.black);
             nomLabel.setForeground(Color.WHITE);
             nomLabel.setBorder(new LineBorder(Color.WHITE));
             nomLabel.setOpaque(true);
 
-            subHLabel = new JLabel("NOMBRE DE SUBDIVISIONS HORITZONTALS");
+            subHLabel = new JLabel("  NOMBRE DE SUBDIVISIONS HORITZONTALS");
             subHLabel.setFont(FONT1);
             subHLabel.setBackground(Color.BLACK);
             subHLabel.setForeground(Color.WHITE);
             subHLabel.setBorder(new LineBorder(Color.WHITE));
             subHLabel.setOpaque(true);
 
-            subVLabel = new JLabel("NOMBRE DE SUBDIVISIONS VERTICALS");
+            subVLabel = new JLabel("  NOMBRE DE SUBDIVISIONS VERTICALS");
             subVLabel.setFont(FONT1);
             subVLabel.setBackground(Color.BLACK);
             subVLabel.setForeground(Color.WHITE);
@@ -462,8 +515,7 @@ public class MainJFrame extends JFrame {
         private void guardarDades() {
             if (p == null) p = new Partida();
             MainJFrame.this.p.setJugador(nom.getText());
-            MainJFrame.this.p.setDivisionsHoritzaontals(Integer.parseInt(subHoritzontal.getText()));
-            MainJFrame.this.p.setDivisionsVerticals(Integer.parseInt(subVertical.getText()));
+            MainJFrame.this.p.setData(LocalDate.now());
         }
 
         private boolean checkdatos() {
@@ -487,9 +539,42 @@ public class MainJFrame extends JFrame {
                 missatge += "* Divisions verticals no pot ser menor que 1\n";
                 resultat = false;
             }
-            JOptionPane a = new JOptionPane();
             if (!resultat) JOptionPane.showMessageDialog(this, missatge, "Error", JOptionPane.ERROR_MESSAGE);
             return resultat;
+        }
+
+        class FiltroSize extends DocumentFilter {
+            @Override
+            public void insertString(FilterBypass fb, int offset, String string,
+                                     AttributeSet attr) throws BadLocationException {
+
+                Document doc = fb.getDocument();
+                StringBuilder sb = new StringBuilder();
+                sb.append(doc.getText(0, doc.getLength()));
+                sb.insert(offset, string);
+
+                if (test(sb.toString())) {
+                    super.insertString(fb, offset, string, attr);
+                }
+            }
+
+            private boolean test(String text) {
+                return text.length() < 13;
+            }
+
+            @Override
+            public void replace(FilterBypass fb, int offset, int length, String text,
+                                AttributeSet attrs) throws BadLocationException {
+
+                Document doc = fb.getDocument();
+                StringBuilder sb = new StringBuilder();
+                sb.append(doc.getText(0, doc.getLength()));
+                sb.replace(offset, offset + length, text);
+
+                if (test(sb.toString())) {
+                    super.replace(fb, offset, length, text, attrs);
+                }
+            }
         }
 
         class FiltroInt extends DocumentFilter {
@@ -508,6 +593,7 @@ public class MainJFrame extends JFrame {
             }
 
             private boolean test(String text) {
+                if (text.length() > 3) return false;
                 try {
                     Integer.parseInt(text);
                     return true;
