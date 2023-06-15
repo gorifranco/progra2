@@ -333,51 +333,60 @@ public class MainJFrame extends JFrame {
     //                                                                        //
     ////////////////////////////////////////////////////////////////////////////
 
-    private void crearPanellPartida(int horitzontal, int vertical) {
-        panellPartida = new JPanel(new GridLayout(horitzontal, vertical));
-        dividirImatge(seleccionarImatgeRandom(), horitzontal, vertical);
-        for (JPanel panellsImatge : panellsImatges) {
-            panellPartida.add(panellsImatge);
-        }
+    private void comensarPartida(int horitzontal, int vertival) throws IOException {
+        crearPanellPartida(horitzontal, vertival);
+        if(panellHistorial != null) panellHistorial.setVisible(false);
         panellStandby.setVisible(false);
-        panellVisualitzacio.add(panellPartida);
+
+        panellVisualitzacio.setBackground(Color.white);
+        panellVisualitzacio.add(panellPartida, BorderLayout.CENTER);
+        this.setSize(1156, 704);
+        this.setResizable(false);
     }
 
-
-    //xapa la imatge en trossos i fica aquests dins JPanels dins un array
-    private void dividirImatge(File imatge, int horitzontal, int vertical) {
-        BufferedImage im = null;
-        try {
-
-            im = (BufferedImage) ImageIO.read(imatge).getScaledInstance(600, 400, Image.SCALE_SMOOTH);
-        }catch(IOException e){
-            System.out.println(e.getMessage());
-        }
-
-        posicionsCorrectes = new boolean[horitzontal*vertical];
-        panellsImatges = new JPanel[horitzontal*vertical];
-        int contador = 0;
-        for (int i = 0; i < horitzontal; i++) {
-            for (int j = 0; j < vertical; j++) {
-                Image subImg = im.getSubimage(i*600/horitzontal, i*400/vertical, 600/horitzontal, 400/vertical);
-                JPanel temp = new JPanel();
-                JLabel jlTemp = new JLabel();
-                jlTemp.setIcon(new ImageIcon(subImg));
-                temp.setName("c" + contador);
-                panellsImatges[contador++] = temp;
+    private void crearPanellPartida(int horitzontal, int vertical) throws IOException{
+        File f = seleccionarImatgeRandom();
+        BufferedImage bi;
+        if (f != null) {
+            try {
+                bi = ImageIO.read(f);
+            }catch (IOException e){
+                throw new IOException();
+            }
+            JLabel[] imatges = dividirImatge(escalarImatge(bi, 910, 540), horitzontal, vertical);
+            panellPartida = new JPanel(new GridLayout(horitzontal, vertical, 1, 1));
+            panellPartida.setBackground(Color.white);
+            for (int i = 0; i < imatges.length; i++) {
+                panellPartida.add(imatges[i]);
             }
         }
-        barallarImatges();
     }
 
-    private void barallarImatges() {
-        Random r = new Random();
-        for (int i = 0; i < panellsImatges.length; i++) {
-            int j = r.nextInt(panellsImatges.length);
-            JPanel temp = panellsImatges[i];
-            panellsImatges[i] = panellsImatges[j];
-            panellsImatges[j] = temp;
+    //xapa la imatge en trossos i fica aquests dins JPanels dins un array
+    private JLabel[] dividirImatge(BufferedImage imatge, int horitzontal, int vertical){
+        JLabel[] imatges = new JLabel[horitzontal*vertical];
+        int contador = 0;
+        for (int j = 0; j < horitzontal; j++) {
+            for (int k = 0; k < vertical; k++) {
+                Image tembImg = imatge.getSubimage(k*imatge.getWidth()/vertical, j*imatge.getHeight()/horitzontal, imatge.getWidth()/vertical, imatge.getHeight()/horitzontal);
+                JLabel tempJL = new JLabel();
+                tempJL.setName(Integer.toString(contador));
+                tempJL.setIcon(new ImageIcon(tembImg));
+                imatges[contador++] = tempJL;
+            }
         }
+        return imatges;
+    }
+
+    private JLabel[] barallarImatges(JLabel[] imatges) {
+        Random r = new Random();
+        for (int i = 0; i < imatges.length; i++) {
+            int j = r.nextInt(imatges.length);
+            JLabel temp = imatges[i];
+            imatges[i] = imatges[j];
+            imatges[j] = temp;
+        }
+        return imatges;
     }
     private void comprobarPosicionsCorrectes(){
         posicionsCorrectes = new boolean[panellsImatges.length];
@@ -388,6 +397,25 @@ public class MainJFrame extends JFrame {
 
     private void comprobarPosicionsCorrectes(JPanel p1, JPanel p2){
 
+    }
+
+    private BufferedImage escalarImatge(BufferedImage src, int w, int h)
+    {
+        BufferedImage img = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
+        int x, y;
+        int ww = src.getWidth();
+        int hh = src.getHeight();
+        int[] ys = new int[h];
+        for (y = 0; y < h; y++)
+            ys[y] = y * hh / h;
+        for (x = 0; x < w; x++) {
+            int newX = x * ww / w;
+            for (y = 0; y < h; y++) {
+                int col = src.getRGB(newX, ys[y]);
+                img.setRGB(x, y, col);
+            }
+        }
+        return img;
     }
 
 
@@ -406,11 +434,12 @@ public class MainJFrame extends JFrame {
 
             }
             if (e.getSource().equals(canviarDirectoriIcona) || e.getSource().equals(canviarDirectoriBotoMenu)) {
+                System.out.println(MainJFrame.this.getWidth());
+                System.out.println(MainJFrame.this.getHeight());
                 canviarDirectoriImatges();
             }
             if (e.getSource().equals(novaPartidaBotoMenu) || e.getSource().equals(novaPartidaButton) || e.getSource().equals(novaPartidaIcona))
                 new IntroduirDades("INTRODUIR DADES");
-
         }
 
         @Override
@@ -507,7 +536,11 @@ public class MainJFrame extends JFrame {
                     if (checkdatos()) {
                         dispose();
                         guardarDades();
-                        MainJFrame.this.crearPanellPartida(Integer.parseInt(subHoritzontal.getText()), Integer.parseInt(subVertical.getText()));
+                        try {
+                            MainJFrame.this.comensarPartida(Integer.parseInt(subHoritzontal.getText()), Integer.parseInt(subVertical.getText()));
+                        }catch(IOException exc){
+                            JOptionPane.showMessageDialog(IntroduirDades.this, "Error creant la partida");
+                        }
                     }
                 }
 

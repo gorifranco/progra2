@@ -11,24 +11,23 @@ public class Proves {
         File f = new File("C:\\Users\\Frank\\Desktop\\programacio\\progra2\\progra2\\src\\imatges\\fondo_teemo.png");
 File f2 = new File("C:\\Users\\Frank\\Desktop\\programacio\\progra2\\progra2\\src\\icones\\iconoCambiarDIrectorio.jpg");
         JFrame jf = new JFrame();
-        jf.setLayout(new GridLayout(5,5));
+        JPanel PImatges = new JPanel(new GridLayout(5,5));
         jf.setVisible(true);
-        JLabel a = new JLabel("asdfa");
+        jf.setSize(600,500);
         BufferedImage i = ImageIO.read(f);
         JPanel[] imatges = new JPanel[25];
-
-        i = scale(i, 600,400);
+        i = scale(i, 600,500);
         for (int j = 0; j < 5; j++) {
             for (int k = 0; k < 5; k++) {
-                Image tembImg = i.getSubimage(k*600/5, j*400/5, 600/5, 400/5);
-                JPanel tempJP = new JPanel();
+                Image tembImg = i.getSubimage(k*600/5, j*500/5, 600/5, 500/5);
                 JLabel tempJL = new JLabel();
+                tempJL.setSize(120,100);
                 tempJL.setIcon(new ImageIcon(tembImg));
-                tempJP.add(tempJL);
-                jf.add(tempJP);
+PImatges.add(tempJL);
             }
         }
-
+jf.add(PImatges);
+        jf.repaint();
 
     }
     public static BufferedImage scale(BufferedImage src, int w, int h)
