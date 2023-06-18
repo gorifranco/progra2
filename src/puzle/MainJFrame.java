@@ -5,6 +5,8 @@ import javax.swing.*;
 import javax.swing.border.LineBorder;
 import javax.swing.text.*;
 import java.awt.*;
+import java.awt.dnd.DragSource;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
@@ -14,6 +16,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -35,7 +38,7 @@ public class MainJFrame extends JFrame {
     private final Font FONT2 = new Font("arial", Font.BOLD, 18);
     private File CARPETAIMATGES = new File("src/imatges");
     private Partida p;
-    private JPanel[] panellsImatges;
+    JLabel[] imatges;
     private boolean[] posicionsCorrectes;
 
 
@@ -335,6 +338,32 @@ public class MainJFrame extends JFrame {
 
     private void comensarPartida(int horitzontal, int vertival) throws IOException {
         crearPanellPartida(horitzontal, vertival);
+        comprobarPosicionsCorrectes();
+        panellPartida.addMouseListener(new MouseAdapter() {
+
+            JLabel pos1;
+            JLabel pos2;
+            @Override
+            public void mousePressed(MouseEvent e) {
+                pos1 = ((JLabel) panellPartida.getComponentAt(e.getPoint()));
+            }
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                pos2 = ((JLabel) panellPartida.getComponentAt(e.getPoint()));
+                swap(pos1, pos2);
+            }
+
+            private void swap(JLabel pos1, JLabel pos2){
+                Icon imgtremp = pos1.getIcon();
+                String nameTemp = pos1.getName();
+                pos1.setIcon(pos2.getIcon());
+                pos1.setName(pos2.getName());
+                pos2.setIcon(imgtremp);
+                pos2.setName(nameTemp);
+                comprobarPosicionsCorrectes(pos1, pos2);
+            }
+        });
+
         if(panellHistorial != null) panellHistorial.setVisible(false);
         panellStandby.setVisible(false);
 
@@ -353,7 +382,8 @@ public class MainJFrame extends JFrame {
             }catch (IOException e){
                 throw new IOException();
             }
-            JLabel[] imatges = dividirImatge(escalarImatge(bi, 910, 540), horitzontal, vertical);
+            dividirImatge(escalarImatge(bi, 910, 540), horitzontal, vertical);
+            barallarImatges();
             panellPartida = new JPanel(new GridLayout(horitzontal, vertical, 1, 1));
             panellPartida.setBackground(Color.white);
             for (int i = 0; i < imatges.length; i++) {
@@ -363,8 +393,8 @@ public class MainJFrame extends JFrame {
     }
 
     //xapa la imatge en trossos i fica aquests dins JPanels dins un array
-    private JLabel[] dividirImatge(BufferedImage imatge, int horitzontal, int vertical){
-        JLabel[] imatges = new JLabel[horitzontal*vertical];
+    private void dividirImatge(BufferedImage imatge, int horitzontal, int vertical){
+        imatges = new JLabel[horitzontal*vertical];
         int contador = 0;
         for (int j = 0; j < horitzontal; j++) {
             for (int k = 0; k < vertical; k++) {
@@ -375,10 +405,9 @@ public class MainJFrame extends JFrame {
                 imatges[contador++] = tempJL;
             }
         }
-        return imatges;
     }
 
-    private JLabel[] barallarImatges(JLabel[] imatges) {
+    private void barallarImatges() {
         Random r = new Random();
         for (int i = 0; i < imatges.length; i++) {
             int j = r.nextInt(imatges.length);
@@ -386,17 +415,20 @@ public class MainJFrame extends JFrame {
             imatges[i] = imatges[j];
             imatges[j] = temp;
         }
-        return imatges;
     }
+
     private void comprobarPosicionsCorrectes(){
-        posicionsCorrectes = new boolean[panellsImatges.length];
-        for (int i = 0; i < panellsImatges.length; i++) {
-            if(panellsImatges[i].getName().substring(1).equals(Integer.toString(i))) posicionsCorrectes[i] = true;
+        posicionsCorrectes = new boolean[imatges.length];
+        for (int i = 0; i < imatges.length; i++) {
+            if(imatges[i].getName().substring(1).equals(Integer.toString(i))) posicionsCorrectes[i] = true;
         }
     }
 
-    private void comprobarPosicionsCorrectes(JPanel p1, JPanel p2){
-
+    private void comprobarPosicionsCorrectes(JLabel p1, JLabel p2){
+        String nom1 = p1.getName();
+        String nom2 = p2.getName();
+        if(imatges[Integer.parseInt(nom1)].getName().equals(nom1)) posicionsCorrectes[Integer.parseInt(nom1)] = true;
+        if(imatges[Integer.parseInt(nom2)].getName().equals(nom2)) posicionsCorrectes[Integer.parseInt(nom2)] = true;
     }
 
     private BufferedImage escalarImatge(BufferedImage src, int w, int h)
@@ -417,7 +449,6 @@ public class MainJFrame extends JFrame {
         }
         return img;
     }
-
 
     private class mouseListenerCustom implements MouseListener {
         @Override
@@ -454,6 +485,7 @@ public class MainJFrame extends JFrame {
         public void mouseExited(MouseEvent e) {
         }
     }
+
 
     ////////////////////////////////////////////////////////////////////////////
     //                                                                        //
@@ -693,5 +725,7 @@ public class MainJFrame extends JFrame {
             }
         }
     }
+
 }
+
 
