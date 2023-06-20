@@ -15,9 +15,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
+import java.util.*;
 import java.util.List;
-import java.util.Objects;
-import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -29,7 +28,7 @@ public class MainJFrame extends JFrame {
     private JMenuBar barraMenu;
     private JTextArea areaVisualitzacioResultats;
     private JPanel panellTop, panellStandby, panellBotons, panellHistorial, panellPartida;
-    private JSplitPane separadorNorte, separadorSur, separadorOeste;
+    private JSplitPane separadorNorte, separadorSur, separadorOeste, separadorSurBarraTemporal;
     private JToolBar iconesMenu;
     private Container panellContinguts;
     private AreaVisualitzacio panellVisualitzacio;
@@ -38,8 +37,9 @@ public class MainJFrame extends JFrame {
     private final Font FONT2 = new Font("arial", Font.BOLD, 18);
     private File CARPETAIMATGES = new File("src/imatges");
     private Partida p;
-    JLabel[] imatges;
-    private boolean[] posicionsCorrectes;
+    private JLabel[] imatges;
+    private int incorrectes;
+    private JProgressBar barraTemporal;
 
 
     //MÉTODO MAIN
@@ -232,10 +232,11 @@ public class MainJFrame extends JFrame {
 
         separadorOeste.add(panellBotons);
         panellContinguts.add(separadorOeste, BorderLayout.WEST);
+//        separadorSur.setBottomComponent(botoContinuar);
+        panellContinguts.add(separadorSur, BorderLayout.SOUTH);
         separadorNorte.add(panellTop);
         panellContinguts.add(separadorNorte, BorderLayout.NORTH);
-        separadorSur.setBottomComponent(botoContinuar);
-        panellContinguts.add(separadorSur, BorderLayout.SOUTH);
+
     }
 
     ////////////////////////////////////////////////////////////////////////////
@@ -306,7 +307,7 @@ public class MainJFrame extends JFrame {
             imatges = walk
                     .filter(Files::isRegularFile)
                     .filter(s -> s.getFileName().toString().substring(s.getFileName().toString().length() - 4).matches("\\.(jpg|png)$"))
-                             .collect(Collectors.toList());
+                    .collect(Collectors.toList());
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }
@@ -343,17 +344,19 @@ public class MainJFrame extends JFrame {
 
             JLabel pos1;
             JLabel pos2;
+
             @Override
             public void mousePressed(MouseEvent e) {
                 pos1 = ((JLabel) panellPartida.getComponentAt(e.getPoint()));
             }
+
             @Override
             public void mouseReleased(MouseEvent e) {
                 pos2 = ((JLabel) panellPartida.getComponentAt(e.getPoint()));
                 swap(pos1, pos2);
             }
 
-            private void swap(JLabel pos1, JLabel pos2){
+            private void swap(JLabel pos1, JLabel pos2) {
                 Icon imgtremp = pos1.getIcon();
                 String nameTemp = pos1.getName();
                 pos1.setIcon(pos2.getIcon());
@@ -364,7 +367,7 @@ public class MainJFrame extends JFrame {
             }
         });
 
-        if(panellHistorial != null) panellHistorial.setVisible(false);
+        if (panellHistorial != null) panellHistorial.setVisible(false);
         panellStandby.setVisible(false);
 
         panellVisualitzacio.setBackground(Color.white);
@@ -373,13 +376,13 @@ public class MainJFrame extends JFrame {
         this.setResizable(false);
     }
 
-    private void crearPanellPartida(int horitzontal, int vertical) throws IOException{
+    private void crearPanellPartida(int horitzontal, int vertical) throws IOException {
         File f = seleccionarImatgeRandom();
         BufferedImage bi;
         if (f != null) {
             try {
                 bi = ImageIO.read(f);
-            }catch (IOException e){
+            } catch (IOException e) {
                 throw new IOException();
             }
             dividirImatge(escalarImatge(bi, 910, 540), horitzontal, vertical);
@@ -390,15 +393,43 @@ public class MainJFrame extends JFrame {
                 panellPartida.add(imatges[i]);
             }
         }
+
+        JPanel p = new JPanel();
+        separadorSurBarraTemporal = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+        barraTemporal = new JProgressBar(0,100);
+        barraTemporal.setFont(FONT1);
+        barraTemporal.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+        barraTemporal.setBackground(Color.RED);
+        barraTemporal.setForeground(Color.YELLOW);
+        barraTemporal.setStringPainted(true);
+        p.setLayout(new BorderLayout(20,20));
+        p.setMinimumSize(new Dimension(panellVisualitzacio.getWidth(), 300));
+        p.add(barraTemporal);
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    while(barraTemporal.getValue()<barraTemporal.getMaximum()) {
+                        Thread.sleep(999);
+                        barraTemporal.setValue(barraTemporal.getValue() + 1);
+                    }
+                }catch (InterruptedException e){
+                    System.out.println(e.getMessage());
+                }
+            }
+        }).start();
+        separadorSurBarraTemporal.add(p, JSplitPane.BOTTOM);
+        panellVisualitzacio.add(separadorSurBarraTemporal, BorderLayout.SOUTH);
     }
 
     //xapa la imatge en trossos i fica aquests dins JPanels dins un array
-    private void dividirImatge(BufferedImage imatge, int horitzontal, int vertical){
-        imatges = new JLabel[horitzontal*vertical];
+    private void dividirImatge(BufferedImage imatge, int horitzontal, int vertical) {
+        imatges = new JLabel[horitzontal * vertical];
         int contador = 0;
         for (int j = 0; j < horitzontal; j++) {
             for (int k = 0; k < vertical; k++) {
-                Image tembImg = imatge.getSubimage(k*imatge.getWidth()/vertical, j*imatge.getHeight()/horitzontal, imatge.getWidth()/vertical, imatge.getHeight()/horitzontal);
+                Image tembImg = imatge.getSubimage(k * imatge.getWidth() / vertical, j * imatge.getHeight() / horitzontal, imatge.getWidth() / vertical, imatge.getHeight() / horitzontal);
                 JLabel tempJL = new JLabel();
                 tempJL.setName(Integer.toString(contador));
                 tempJL.setIcon(new ImageIcon(tembImg));
@@ -417,22 +448,26 @@ public class MainJFrame extends JFrame {
         }
     }
 
-    private void comprobarPosicionsCorrectes(){
-        posicionsCorrectes = new boolean[imatges.length];
+    private void comprobarPosicionsCorrectes() {
+        incorrectes = 0;
         for (int i = 0; i < imatges.length; i++) {
-            if(imatges[i].getName().substring(1).equals(Integer.toString(i))) posicionsCorrectes[i] = true;
+            if (imatges[i].getName().equals(Integer.toString(i))) incorrectes++;
         }
     }
 
-    private void comprobarPosicionsCorrectes(JLabel p1, JLabel p2){
-        String nom1 = p1.getName();
-        String nom2 = p2.getName();
-        if(imatges[Integer.parseInt(nom1)].getName().equals(nom1)) posicionsCorrectes[Integer.parseInt(nom1)] = true;
-        if(imatges[Integer.parseInt(nom2)].getName().equals(nom2)) posicionsCorrectes[Integer.parseInt(nom2)] = true;
+    private void comprobarPosicionsCorrectes(JLabel p1, JLabel p2) {
+        boolean correcte1 = imatges[Integer.parseInt(p1.getName())].getName().equals(p1.getName());
+        boolean correcte2 = imatges[Integer.parseInt(p2.getName())].getName().equals(p2.getName());
+        if (correcte1 && !correcte2) {
+            incorrectes++;
+        }
+        if (!correcte1 && correcte2) {
+            incorrectes--;
+        }
+        if (incorrectes == 0) partidaGuanyada();
     }
 
-    private BufferedImage escalarImatge(BufferedImage src, int w, int h)
-    {
+    private BufferedImage escalarImatge(BufferedImage src, int w, int h) {
         BufferedImage img = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
         int x, y;
         int ww = src.getWidth();
@@ -448,6 +483,15 @@ public class MainJFrame extends JFrame {
             }
         }
         return img;
+    }
+
+    private void partidaGuanyada() {
+        JOptionPane.showMessageDialog(this, "Enhorabona, has guanyat!!!");
+//        panellSolucio = new
+//        panellStandby.setVisible(true);
+    }
+    private void partidaPerduda(){
+
     }
 
     private class mouseListenerCustom implements MouseListener {
@@ -485,7 +529,6 @@ public class MainJFrame extends JFrame {
         public void mouseExited(MouseEvent e) {
         }
     }
-
 
     ////////////////////////////////////////////////////////////////////////////
     //                                                                        //
@@ -570,7 +613,7 @@ public class MainJFrame extends JFrame {
                         guardarDades();
                         try {
                             MainJFrame.this.comensarPartida(Integer.parseInt(subHoritzontal.getText()), Integer.parseInt(subVertical.getText()));
-                        }catch(IOException exc){
+                        } catch (IOException exc) {
                             JOptionPane.showMessageDialog(IntroduirDades.this, "Error creant la partida");
                         }
                     }
@@ -664,6 +707,7 @@ public class MainJFrame extends JFrame {
 
                 if (test(sb.toString())) {
                     super.replace(fb, offset, length, text, attrs);
+
                 }
             }
         }
@@ -725,7 +769,4 @@ public class MainJFrame extends JFrame {
             }
         }
     }
-
 }
-
-
