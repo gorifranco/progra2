@@ -5,7 +5,6 @@ import javax.swing.*;
 import javax.swing.border.LineBorder;
 import javax.swing.text.*;
 import java.awt.*;
-import java.awt.dnd.DragSource;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -34,12 +33,12 @@ public class MainJFrame extends JFrame {
     private AreaVisualitzacio panellVisualitzacio;
     private JLabel imatgeUIB;
     private final Font FONT1 = new Font("arial", Font.BOLD, 14);
-    private final Font FONT2 = new Font("arial", Font.BOLD, 18);
     private File CARPETAIMATGES = new File("src/imatges");
     private Partida p;
     private JLabel[] imatges;
-    private int incorrectes;
     private JProgressBar barraTemporal;
+    private Thread temporitzador;
+    private boolean gameOn = false;
 
 
     //MÉTODO MAIN
@@ -262,31 +261,39 @@ public class MainJFrame extends JFrame {
         }
     }
 
-    private JPanel crearPanellHistorial() {
+    private void imprimirHistorial(){
+        ArrayList<Partida> partidesHistorial = Partida.llegirPartides();
+        for (Partida p : partidesHistorial){
+            areaVisualitzacioResultats.append("- Jugador: " + p.getJugador() + "\t");
+            areaVisualitzacioResultats.append("- Data: " + p.getData() + "\t");
+            areaVisualitzacioResultats.append("- Punts: " + p.getPunts() + "\n");
+        }
+    }
+    private void imprimirClassificacio(String nom){
+        ArrayList<Partida> partidesHistorial = Partida.llegirPartides();
+        for (Partida p : partidesHistorial){
+            if(p.getJugador().equals(nom)) {
+                areaVisualitzacioResultats.append("- Jugador: " + p.getJugador() + "\t");
+                areaVisualitzacioResultats.append("- Data: " + p.getData() + "\t");
+                areaVisualitzacioResultats.append("- Punts: " + p.getPunts() + "\n");
+            }
+        }
+    }
+    private void buidarHistorial(){
+        areaVisualitzacioResultats.setText("\t      HISTORIAL\n\t\t\t\n");
+    }
+    private void crearPanellHistorial() {
         panellHistorial = new JPanel();
         panellHistorial.setBackground(Color.WHITE);
 
         areaVisualitzacioResultats = new JTextArea();
         areaVisualitzacioResultats.setBackground(Color.WHITE);
         areaVisualitzacioResultats.setEditable(false);
-        areaVisualitzacioResultats.setText("\tHISTORIAL\n\n");
+        areaVisualitzacioResultats.setText("\t      HISTORIAL\n\t\t\t\n");
         areaVisualitzacioResultats.setFont(FONT1);
         areaVisualitzacioResultats.setTabSize(20);
 
-        areaVisualitzacioResultats.append("JUGADOR: JUANfffffffd\t");
-        areaVisualitzacioResultats.append("-fecha: ufsdgdfgsa\t");
-        areaVisualitzacioResultats.append("-puntos: 65\n");
-        areaVisualitzacioResultats.append("JUGADOR: J\t");
-        areaVisualitzacioResultats.append("-fecha: ufsduksa\t");
-        areaVisualitzacioResultats.append("-puntos: 65\n");
-        areaVisualitzacioResultats.append("JUGADOR: JUAN\t");
-        areaVisualitzacioResultats.append("-fecha: ufsduksa\t");
-        areaVisualitzacioResultats.append("-puntos: 65");
-
         panellHistorial.add(areaVisualitzacioResultats);
-
-
-        return panellHistorial;
     }
 
     private void canviarDirectoriImatges() {
@@ -338,6 +345,7 @@ public class MainJFrame extends JFrame {
     ////////////////////////////////////////////////////////////////////////////
 
     private void comensarPartida(int horitzontal, int vertival) throws IOException {
+        gameOn = true;
         crearPanellPartida(horitzontal, vertival);
         comprobarPosicionsCorrectes();
         panellPartida.addMouseListener(new MouseAdapter() {
@@ -363,7 +371,7 @@ public class MainJFrame extends JFrame {
                 pos1.setName(pos2.getName());
                 pos2.setIcon(imgtremp);
                 pos2.setName(nameTemp);
-                comprobarPosicionsCorrectes(pos1, pos2);
+                if(comprobarPosicionsCorrectes()) partidaGuanyada();
             }
         });
 
@@ -372,7 +380,7 @@ public class MainJFrame extends JFrame {
 
         panellVisualitzacio.setBackground(Color.white);
         panellVisualitzacio.add(panellPartida, BorderLayout.CENTER);
-        this.setSize(1156, 704);
+        this.setSize(1150, 700);
         this.setResizable(false);
     }
 
@@ -393,33 +401,31 @@ public class MainJFrame extends JFrame {
                 panellPartida.add(imatges[i]);
             }
         }
-
-        JPanel p = new JPanel();
         separadorSurBarraTemporal = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-        barraTemporal = new JProgressBar(0,100);
+        barraTemporal = new JProgressBar(0, 100);
         barraTemporal.setFont(FONT1);
         barraTemporal.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
         barraTemporal.setBackground(Color.RED);
         barraTemporal.setForeground(Color.YELLOW);
         barraTemporal.setStringPainted(true);
-        p.setLayout(new BorderLayout(20,20));
-        p.setMinimumSize(new Dimension(panellVisualitzacio.getWidth(), 300));
-        p.add(barraTemporal);
 
-        new Thread(new Runnable() {
+        temporitzador = new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
-                    while(barraTemporal.getValue()<barraTemporal.getMaximum()) {
+                    while (barraTemporal.getValue() < barraTemporal.getMaximum()) {
                         Thread.sleep(999);
                         barraTemporal.setValue(barraTemporal.getValue() + 1);
                     }
-                }catch (InterruptedException e){
+                    partidaPerduda();
+                } catch (InterruptedException e) {
                     System.out.println(e.getMessage());
                 }
+
             }
-        }).start();
-        separadorSurBarraTemporal.add(p, JSplitPane.BOTTOM);
+        });
+        temporitzador.start();
+        separadorSurBarraTemporal.add(barraTemporal, JSplitPane.BOTTOM);
         panellVisualitzacio.add(separadorSurBarraTemporal, BorderLayout.SOUTH);
     }
 
@@ -448,24 +454,26 @@ public class MainJFrame extends JFrame {
         }
     }
 
-    private void comprobarPosicionsCorrectes() {
-        incorrectes = 0;
+    private boolean comprobarPosicionsCorrectes() {
         for (int i = 0; i < imatges.length; i++) {
-            if (imatges[i].getName().equals(Integer.toString(i))) incorrectes++;
+            if (!imatges[i].getName().equals(Integer.toString(i))) return false;
         }
+        return true;
     }
 
-    private void comprobarPosicionsCorrectes(JLabel p1, JLabel p2) {
-        boolean correcte1 = imatges[Integer.parseInt(p1.getName())].getName().equals(p1.getName());
-        boolean correcte2 = imatges[Integer.parseInt(p2.getName())].getName().equals(p2.getName());
-        if (correcte1 && !correcte2) {
-            incorrectes++;
-        }
-        if (!correcte1 && correcte2) {
-            incorrectes--;
-        }
-        if (incorrectes == 0) partidaGuanyada();
-    }
+//
+//    private void comprobarPosicionsCorrectes(JLabel p1, JLabel p2) {
+//        boolean correcte1 = imatges[Integer.parseInt(p1.getName())].getName().equals(p1.getName());
+//        boolean correcte2 = imatges[Integer.parseInt(p2.getName())].getName().equals(p2.getName());
+//        if (correcte1 && !correcte2) {
+//            incorrectes++;
+//        }
+//        if (!correcte1 && correcte2) {
+//            incorrectes--;
+//        }
+//        System.out.println(incorrectes);
+//        if (incorrectes == 0) partidaGuanyada();
+//    }
 
     private BufferedImage escalarImatge(BufferedImage src, int w, int h) {
         BufferedImage img = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
@@ -486,12 +494,22 @@ public class MainJFrame extends JFrame {
     }
 
     private void partidaGuanyada() {
+        gameOn = false;
+        temporitzador.interrupt();
         JOptionPane.showMessageDialog(this, "Enhorabona, has guanyat!!!");
-//        panellSolucio = new
-//        panellStandby.setVisible(true);
+        panellPartida.setVisible(false);
+        panellStandby.setVisible(true);
+        separadorSurBarraTemporal.setVisible(false);
+        p.setPunts(4);
+        Partida.guardarPartida(p);
+        this.setResizable(true);
     }
-    private void partidaPerduda(){
 
+    private void partidaPerduda() {
+        gameOn = false;
+p.setPunts(0);
+Partida.guardarPartida(p);
+this.setResizable(true);
     }
 
     private class mouseListenerCustom implements MouseListener {
@@ -501,20 +519,41 @@ public class MainJFrame extends JFrame {
 
         @Override
         public void mousePressed(MouseEvent e) {
-            if (e.getSource().equals(sortirIcona) || e.getSource().equals(sortirBoto) || e.getSource().equals(sortirBotoMenu))
-                System.exit(0);
-            if (e.getSource().equals(historialBoto) || e.getSource().equals(historialIcona) || e.getSource().equals(historialBotoMenu)) {
-                panellStandby.setVisible(false);
-                panellVisualitzacio.add(crearPanellHistorial(), BorderLayout.CENTER);
 
+            if (temporitzador == null || !gameOn) {
+                if (e.getSource().equals(sortirIcona) || e.getSource().equals(sortirBoto) || e.getSource().equals(sortirBotoMenu))
+                    System.exit(0);
+                if (e.getSource().equals(historialBoto) || e.getSource().equals(historialIcona) || e.getSource().equals(historialBotoMenu)) {
+                    panellStandby.setVisible(false);
+                    if (panellHistorial == null) {
+                        crearPanellHistorial();
+                    } else {
+                        buidarHistorial();
+                    }
+                    imprimirHistorial();
+                    panellVisualitzacio.add(panellHistorial, BorderLayout.CENTER);
+
+                }
+                if (e.getSource().equals(canviarDirectoriIcona) || e.getSource().equals(canviarDirectoriBotoMenu)) {
+                    System.out.println(MainJFrame.this.getWidth());
+                    System.out.println(MainJFrame.this.getHeight());
+                    canviarDirectoriImatges();
+                }
+                if (e.getSource().equals(novaPartidaBotoMenu) || e.getSource().equals(novaPartidaButton) || e.getSource().equals(novaPartidaIcona))
+                    new IntroduirDades("INTRODUIR DADES");
+                if(e.getComponent().equals(classificacioBoto) || e.getComponent().equals(classificacioBotoMenu) || e.getComponent().equals(classificacioIcona)) {
+                    String nom = JOptionPane.showInputDialog("Historial del jugador\n Introduir el nom del jugador");
+                    if (panellHistorial == null) {
+                        crearPanellHistorial();
+                    } else {
+                        buidarHistorial();
+                    }
+                    imprimirClassificacio(nom);
+                    panellVisualitzacio.add(panellHistorial, BorderLayout.CENTER);
+                }
+            } else {
+                JOptionPane.showMessageDialog(MainJFrame.this, "Partida en curs!!");
             }
-            if (e.getSource().equals(canviarDirectoriIcona) || e.getSource().equals(canviarDirectoriBotoMenu)) {
-                System.out.println(MainJFrame.this.getWidth());
-                System.out.println(MainJFrame.this.getHeight());
-                canviarDirectoriImatges();
-            }
-            if (e.getSource().equals(novaPartidaBotoMenu) || e.getSource().equals(novaPartidaButton) || e.getSource().equals(novaPartidaIcona))
-                new IntroduirDades("INTRODUIR DADES");
         }
 
         @Override
